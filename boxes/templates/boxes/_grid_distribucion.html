@@ -4,7 +4,7 @@
     <div class="nombre">{{ item.box.nombre }}</div>
     {% if item.medicos %}
       {% for medico in item.medicos %}
-        <div class="medico">{{ medico }}</div>
+        <div class="medico">{% if item.medicos|length > 1 %}<span class="medico-badge">{{ forloop.counter }}</span>{% endif %}{{ medico }}</div>
       {% endfor %}
     {% else %}
       <div class="medico">Sin médico asignado</div>
