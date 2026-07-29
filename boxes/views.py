@@ -1,3 +1,4 @@
+import datetime
 import re
 
 from django.contrib import messages
@@ -67,26 +68,32 @@ class BoxDeleteView(PermissionRequiredMixin, DeleteView):
 
 @login_required
 def distribucion(request):
+    try:
+        dia = int(request.GET.get("dia"))
+        if not 0 <= dia <= 6:
+            raise ValueError
+    except (TypeError, ValueError):
+        dia = datetime.date.today().weekday()
+
     boxes = sorted(Box.objects.filter(activo=True), key=_clave_orden)
-    asignaciones = (
-        AsignacionBox.objects.select_related("medico", "box")
-        .order_by("box", "dia_semana")
-    )
+    asignaciones = AsignacionBox.objects.select_related("medico", "box")
     por_box = {}
     for a in asignaciones:
         por_box.setdefault(a.box_id, []).append(a)
 
+    def _medicos_ese_dia(box):
+        reglas = por_box.get(box.id, [])
+        especificas = [a.medico.nombre_completo for a in reglas if a.dia_semana == dia]
+        if especificas:
+            return especificas
+        return [a.medico.nombre_completo for a in reglas if a.dia_semana is None]
+
     def _preparar(lista_boxes):
-        resultado = []
-        for box in lista_boxes:
-            reglas = []
-            for a in por_box.get(box.id, []):
-                dia = "Todos los días" if a.dia_semana is None else DIAS_SEMANA[a.dia_semana]
-                reglas.append({"medico": a.medico.nombre_completo, "dia": dia})
-            resultado.append({"box": box, "reglas": reglas})
-        return resultado
+        return [{"box": box, "medicos": _medicos_ese_dia(box)} for box in lista_boxes]
 
     contexto = {
+        "dia": dia,
+        "dias_tab": list(enumerate(DIAS_SEMANA)),
         "piso1": _preparar([b for b in boxes if b.piso == 1]),
         "piso2": _preparar([b for b in boxes if b.piso == 2]),
     }

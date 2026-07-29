@@ -17,22 +17,47 @@
   {% endif %}
 </div>
 
-<table class="tabla-simple">
-  <thead>
-    <tr><th>Hora</th><th>Médico</th><th>Especialidad</th><th>Box</th><th>Estado</th></tr>
-  </thead>
-  <tbody>
-    {% for bloque in bloques %}
-    <tr>
-      <td>{{ bloque.hora_inicio|time:"H:i" }} - {{ bloque.hora_fin|time:"H:i" }}</td>
-      <td>{{ bloque.medico.nombre_completo }}</td>
-      <td>{{ bloque.especialidad|default:"—" }}</td>
-      <td>{{ bloque.box.nombre|default:"Sin asignar" }}</td>
-      <td>{{ bloque.get_estado_display }}</td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="5">No hay bloques de agenda para este día.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="tarjeta">
+  <h2>Resumen por médico</h2>
+  <table class="tabla-simple">
+    <thead>
+      <tr><th>Médico</th><th>Box</th><th>Hora mín. desde</th><th>Hora máx. hasta</th><th>Cantidad de citas</th></tr>
+    </thead>
+    <tbody>
+      {% for fila in resumen %}
+      <tr>
+        <td>{{ fila.medico__nombre_completo }}</td>
+        <td>{{ fila.box__nombre|default:"Sin asignar" }}</td>
+        <td>{{ fila.hora_min|time:"H:i" }}</td>
+        <td>{{ fila.hora_max|time:"H:i" }}</td>
+        <td>{{ fila.cantidad }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">No hay bloques de agenda para este día.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="tarjeta">
+  <h2>Detalle</h2>
+  <table class="tabla-simple">
+    <thead>
+      <tr><th>Hora</th><th>Médico</th><th>Especialidad</th><th>Box</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+      {% for bloque in bloques %}
+      <tr>
+        <td>{{ bloque.hora_inicio|time:"H:i" }} - {{ bloque.hora_fin|time:"H:i" }}</td>
+        <td>{{ bloque.medico.nombre_completo }}</td>
+        <td>{{ bloque.especialidad|default:"—" }}</td>
+        <td>{{ bloque.box.nombre|default:"Sin asignar" }}</td>
+        <td>{{ bloque.get_estado_display }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">No hay bloques de agenda para este día.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

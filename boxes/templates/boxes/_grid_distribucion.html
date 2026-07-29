@@ -1,10 +1,10 @@
 <div class="boxes-grid">
   {% for item in lista %}
-  <div class="box-tarjeta{% if not item.reglas %} vacio{% endif %}">
+  <div class="box-tarjeta{% if not item.medicos %} vacio{% endif %}">
     <div class="nombre">{{ item.box.nombre }}</div>
-    {% if item.reglas %}
-      {% for regla in item.reglas %}
-        <div class="medico">{{ regla.medico }} <small>({{ regla.dia }})</small></div>
+    {% if item.medicos %}
+      {% for medico in item.medicos %}
+        <div class="medico">{{ medico }}</div>
       {% endfor %}
     {% else %}
       <div class="medico">Sin médico asignado</div>
