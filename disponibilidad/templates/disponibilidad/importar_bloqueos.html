@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titulo %}Importar bloqueos{% endblock %}
+{% block contenido %}
+<h1>Importar bloqueos de médicos</h1>
+<p>Sube el archivo con los períodos en que cada médico se ausenta (ej. <code>ExportarBloqueos-20260729.xlsx</code>).
+Al importar, se reemplazan todos los bloqueos anteriores por los de este archivo (representa el estado vigente).</p>
+
+<div class="tarjeta">
+  <form class="formulario" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="boton" type="submit">Importar</button>
+  </form>
+</div>
+
+<p><a href="{% url 'disponibilidad:alertas' %}">Ver alertas de bloqueos sin oferta correspondiente »</a></p>
+{% endblock %}

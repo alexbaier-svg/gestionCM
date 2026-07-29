@@ -9,9 +9,13 @@ from django.core.management.base import BaseCommand
 
 from agenda.models import BloqueAgenda, ImportacionAgenda
 from boxes.models import AsignacionBox, Box
+from disponibilidad.models import BloqueoMedico, OfertaMedico
 from medicos.models import Especialidad, Medico
 
-ADMIN_MODELOS = [Medico, Especialidad, Box, AsignacionBox, BloqueAgenda, ImportacionAgenda, User]
+ADMIN_MODELOS = [
+    Medico, Especialidad, Box, AsignacionBox, BloqueAgenda, ImportacionAgenda, User,
+    OfertaMedico, BloqueoMedico,
+]
 ADMIN_ACCIONES = ["add", "change", "delete", "view"]
 
 RECEPCION_PERMISOS = [

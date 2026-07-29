@@ -173,3 +173,43 @@ form.formulario .errorlist { color: var(--rojo); padding-left: 1rem; margin: 0.2
   justify-content: center;
 }
 .centro-login .tarjeta { width: 100%; max-width: 380px; }
+
+table.mapa-calor {
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+table.mapa-calor th, table.mapa-calor td {
+  border: 1px solid var(--gris-borde);
+  padding: 0;
+  text-align: center;
+}
+table.mapa-calor th {
+  background: #eef1f4;
+  padding: 0.3rem 0.4rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+table.mapa-calor td.nombre-box {
+  padding: 0.3rem 0.6rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: left;
+  background: #fafbfc;
+}
+table.mapa-calor td.celda-ocupada, .celda-leyenda.celda-ocupada {
+  background: var(--azul);
+  width: 22px;
+  height: 22px;
+}
+table.mapa-calor td.celda-libre, .celda-leyenda.celda-libre {
+  background: #f2f4f6;
+  width: 22px;
+  height: 22px;
+}
+.celda-leyenda {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  vertical-align: middle;
+}

@@ -52,6 +52,26 @@ def dashboard(request):
             "url": "agenda:importar",
             "icono": "⬆️",
         })
+    accesos.append({
+        "titulo": "Ocupación de boxes",
+        "descripcion": "Mapa de calor: horas ocupadas según oferta y bloqueos.",
+        "url": "disponibilidad:mapa_calor",
+        "icono": "🔥",
+    })
+    if request.user.has_perm("disponibilidad.add_ofertamedico"):
+        accesos.append({
+            "titulo": "Importar oferta",
+            "descripcion": "Subir el archivo de horarios de atención de los médicos.",
+            "url": "disponibilidad:importar_oferta",
+            "icono": "⬆️",
+        })
+    if request.user.has_perm("disponibilidad.add_bloqueomedico"):
+        accesos.append({
+            "titulo": "Importar bloqueos",
+            "descripcion": "Subir el archivo de ausencias de los médicos.",
+            "url": "disponibilidad:importar_bloqueos",
+            "icono": "⬆️",
+        })
     if request.user.has_perm("auth.view_user"):
         accesos.append({
             "titulo": "Usuarios",

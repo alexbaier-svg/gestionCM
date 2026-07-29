@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Importar oferta{% endblock %}
+{% block contenido %}
+<h1>Importar oferta de médicos</h1>
+<p>Sube el archivo con los horarios en que cada médico atiende (ej. <code>ExportarOferta-20260729.xlsx</code>).
+Al importar, se reemplaza toda la oferta anterior por la de este archivo (representa el estado vigente).</p>
+
+<div class="tarjeta">
+  <form class="formulario" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="boton" type="submit">Importar</button>
+  </form>
+</div>
+{% endblock %}

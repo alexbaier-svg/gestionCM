@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block titulo %}Ocupación de boxes{% endblock %}
+{% block ancho_clase %}contenedor-ancho{% endblock %}
+{% block contenido %}
+<h1>Ocupación de boxes</h1>
+<p>Horas en que cada box está ocupado según la oferta de los médicos (8:00 a 20:00), descontando sus bloqueos.</p>
+
+<div class="botones">
+  {% for i, nombre in dias_tab %}
+    {% if i == dia %}
+      <span class="boton">{{ nombre }}</span>
+    {% else %}
+      <a class="boton secundario" href="?dia={{ i }}&piso={{ piso }}">{{ nombre }}</a>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<div class="botones">
+  {% if piso == "todos" %}<span class="boton">Ambos pisos</span>{% else %}<a class="boton secundario" href="?dia={{ dia }}&piso=todos">Ambos pisos</a>{% endif %}
+  {% if piso == "1" %}<span class="boton">Piso 1</span>{% else %}<a class="boton secundario" href="?dia={{ dia }}&piso=1">Piso 1</a>{% endif %}
+  {% if piso == "2" %}<span class="boton">Piso 2</span>{% else %}<a class="boton secundario" href="?dia={{ dia }}&piso=2">Piso 2</a>{% endif %}
+</div>
+
+<div class="tarjeta" style="overflow-x:auto;">
+  <table class="mapa-calor">
+    <thead>
+      <tr>
+        <th>Box</th>
+        {% for hora in slots %}<th>{{ hora }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for fila in filas %}
+      <tr>
+        <td class="nombre-box">{{ fila.box.nombre }}</td>
+        {% for celda in fila.celdas %}
+          <td class="{% if celda.ocupado %}celda-ocupada{% else %}celda-libre{% endif %}" title="{{ celda.medicos }}"></td>
+        {% endfor %}
+      </tr>
+      {% empty %}
+      <tr><td colspan="{{ slots|length|add:1 }}">No hay boxes para mostrar.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p><span class="celda-leyenda celda-ocupada"></span> Ocupado &nbsp; <span class="celda-leyenda celda-libre"></span> Libre — pasa el mouse sobre una celda ocupada para ver el médico.</p>
+{% endblock %}

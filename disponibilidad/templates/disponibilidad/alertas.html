@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Alertas de bloqueos{% endblock %}
+{% block ancho_clase %}contenedor-ancho{% endblock %}
+{% block contenido %}
+<h1>Alertas: bloqueos sin oferta correspondiente</h1>
+<p>Estos bloqueos caen en un día en que el médico no tiene oferta registrada — probablemente
+un error al cargarlos (el médico no atendía ese día de todas formas, o se equivocó el día).</p>
+
+<table class="tabla-simple">
+  <thead><tr><th>Médico</th><th>Día</th><th>Horario bloqueado</th><th>Tipo</th><th>Motivo</th></tr></thead>
+  <tbody>
+    {% for b in bloqueos_sin_oferta %}
+    <tr>
+      <td>{{ b.medico }}</td>
+      <td>{{ b.dia }}</td>
+      <td>{{ b.hora_inicio|time:"H:i" }} - {{ b.hora_fin|time:"H:i" }}</td>
+      <td>{{ b.tipo }}</td>
+      <td>{{ b.motivo|default:"—" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No hay alertas — todos los bloqueos coinciden con un día de oferta.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
