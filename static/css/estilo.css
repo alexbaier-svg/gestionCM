@@ -1,0 +1,175 @@
+:root {
+  --azul: #1e88e5;
+  --azul-oscuro: #0d2d52;
+  --azul-claro: #5aaee0;
+  --gris-fondo: #f5f6f8;
+  --gris-borde: #dde1e6;
+  --texto: #23282e;
+  --texto-suave: #5b6470;
+  --verde: #4caf50;
+  --rojo: #c0392b;
+  --radio: 8px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--gris-fondo);
+  color: var(--texto);
+  line-height: 1.5;
+}
+
+a { color: var(--azul); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.barra {
+  background: var(--azul-oscuro);
+  color: #fff;
+  padding: 0.9rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.barra a { color: #fff; }
+.barra .marca { font-size: 1.15rem; font-weight: 600; }
+.barra nav { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
+.barra nav a.activo { text-decoration: underline; }
+
+.contenedor {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.contenedor-ancho {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.tarjeta {
+  background: #fff;
+  border: 1px solid var(--gris-borde);
+  border-radius: var(--radio);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+h1 { font-size: 1.6rem; margin-top: 0; }
+h2 { font-size: 1.25rem; margin-top: 0; }
+
+.menu-principal {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.menu-principal a.tarjeta {
+  display: block;
+  text-decoration: none;
+  color: var(--texto);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.menu-principal a.tarjeta:hover {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+.menu-principal .icono { font-size: 1.8rem; color: var(--azul-claro); }
+.menu-principal a.tarjeta { border-top: 3px solid var(--azul-claro); }
+
+table.tabla-simple {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+table.tabla-simple th, table.tabla-simple td {
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--gris-borde);
+  text-align: left;
+}
+table.tabla-simple th {
+  background: #eef1f4;
+  font-weight: 600;
+}
+table.tabla-simple tr:hover td { background: #fafbfc; }
+
+.botones { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 1rem 0; }
+
+.boton {
+  display: inline-block;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radio);
+  border: 1px solid var(--azul);
+  background: var(--azul);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.boton:hover { background: var(--azul-oscuro); text-decoration: none; }
+.boton.secundario { background: #fff; color: var(--azul); }
+.boton.peligro { background: #fff; color: var(--rojo); border-color: var(--rojo); }
+.boton.peligro:hover { background: var(--rojo); color: #fff; }
+
+form.formulario p { margin: 0 0 1rem; }
+form.formulario label { display: block; font-weight: 600; margin-bottom: 0.3rem; }
+form.formulario input[type=text],
+form.formulario input[type=email],
+form.formulario input[type=password],
+form.formulario input[type=date],
+form.formulario select,
+form.formulario textarea {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--gris-borde);
+  border-radius: var(--radio);
+  font-size: 1rem;
+}
+form.formulario .errorlist { color: var(--rojo); padding-left: 1rem; margin: 0.2rem 0; }
+
+.mensajes { margin-bottom: 1rem; }
+.mensaje {
+  padding: 0.7rem 1rem;
+  border-radius: var(--radio);
+  margin-bottom: 0.5rem;
+  background: #e8f4ea;
+  color: var(--verde);
+  border: 1px solid #bfe2c8;
+}
+.mensaje.error { background: #fbeae8; color: var(--rojo); border-color: #f0c4bd; }
+
+.pisos { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 800px) { .pisos { grid-template-columns: 1fr; } }
+
+.boxes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.8rem;
+}
+.box-tarjeta {
+  border: 1px solid var(--gris-borde);
+  border-radius: var(--radio);
+  padding: 0.7rem;
+  background: #fafbfc;
+}
+.box-tarjeta .nombre { font-weight: 600; }
+.box-tarjeta .medico { color: var(--texto-suave); font-size: 0.9rem; }
+.box-tarjeta.vacio { opacity: 0.6; }
+
+.pie-pagina {
+  text-align: center;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+  padding: 1.5rem;
+}
+
+.centro-login {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.centro-login .tarjeta { width: 100%; max-width: 380px; }

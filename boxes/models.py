@@ -8,7 +8,12 @@ class Box(models.Model):
         PROCEDIMIENTOS = "procedimientos", "Procedimientos"
         OTRO = "otro", "Otro"
 
+    class Piso(models.IntegerChoices):
+        PRIMERO = 1, "Piso 1"
+        SEGUNDO = 2, "Piso 2"
+
     nombre = models.CharField(max_length=100, unique=True)
+    piso = models.PositiveSmallIntegerField(choices=Piso.choices, default=Piso.SEGUNDO)
     area = models.CharField(max_length=20, choices=Area.choices, default=Area.CONSULTA)
     ubicacion = models.CharField(max_length=150, blank=True)
     activo = models.BooleanField(default=True)

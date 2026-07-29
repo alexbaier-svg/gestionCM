@@ -1,0 +1,19 @@
+<table class="tabla-simple">
+  <thead><tr><th>Nombre</th><th>Área</th><th>Ubicación</th><th>Activo</th><th></th></tr></thead>
+  <tbody>
+    {% for box in lista %}
+    <tr>
+      <td>{{ box.nombre }}</td>
+      <td>{{ box.get_area_display }}</td>
+      <td>{{ box.ubicacion|default:"—" }}</td>
+      <td>{% if box.activo %}Sí{% else %}No{% endif %}</td>
+      <td>
+        {% if perms.boxes.change_box %}<a href="{% url 'boxes:editar' box.pk %}">Editar</a>{% endif %}
+        {% if perms.boxes.delete_box %} · <a href="{% url 'boxes:eliminar' box.pk %}">Eliminar</a>{% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">Sin boxes en este piso.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>

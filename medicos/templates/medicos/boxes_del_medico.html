@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block titulo %}Boxes de {{ medico.nombre_completo }}{% endblock %}
+{% block contenido %}
+<h1>Boxes de {{ medico.nombre_completo }}</h1>
+<p><a href="{% url 'medicos:listar' %}">« Volver a médicos</a></p>
+
+<div class="tarjeta">
+  <h2>Boxes asignados (regla fija)</h2>
+  <table class="tabla-simple">
+    <thead><tr><th>Box</th><th>Día</th><th></th></tr></thead>
+    <tbody>
+      {% for a in asignaciones %}
+      <tr>
+        <td>{{ a.box.nombre }}</td>
+        <td>
+          {% if a.dia_semana is None %}Todos los días{% else %}
+            {% for i, nombre in dias_semana %}{% if i == a.dia_semana %}{{ nombre }}{% endif %}{% endfor %}
+          {% endif %}
+        </td>
+        <td>
+          {% if puede_editar %}
+          <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="eliminar" value="{{ a.pk }}">
+            <button class="boton peligro" type="submit" style="padding:0.2rem 0.6rem;">Quitar</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">Sin boxes asignados todavía.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if puede_editar %}
+<div class="tarjeta">
+  <h2>Agregar asignación</h2>
+  <form class="formulario" method="post">
+    {% csrf_token %}
+    <p>
+      <label>Box</label>
+      <select name="box" required>
+        {% for box in boxes_disponibles %}
+        <option value="{{ box.pk }}">{{ box.nombre }} (Piso {{ box.piso }})</option>
+        {% endfor %}
+      </select>
+    </p>
+    <p>
+      <label>Día (opcional — vacío aplica todos los días)</label>
+      <select name="dia_semana">
+        <option value="">Todos los días</option>
+        {% for i, nombre in dias_semana %}
+        <option value="{{ i }}">{{ nombre }}</option>
+        {% endfor %}
+      </select>
+    </p>
+    <button class="boton" type="submit">Agregar</button>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

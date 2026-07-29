@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Agenda diaria{% endblock %}
+{% block ancho_clase %}contenedor-ancho{% endblock %}
+{% block contenido %}
+<h1>Agenda diaria — {{ fecha|date:"l j \d\e F \d\e Y" }}</h1>
+
+<div class="botones">
+  <a class="boton secundario" href="?fecha={{ fecha_anterior|date:'Y-m-d' }}">« Día anterior</a>
+  <form method="get" style="display:inline-flex; gap:0.5rem; align-items:center;">
+    <input type="date" name="fecha" value="{{ fecha|date:'Y-m-d' }}">
+    <button class="boton secundario" type="submit">Ir</button>
+  </form>
+  <a class="boton secundario" href="?fecha={{ fecha_siguiente|date:'Y-m-d' }}">Día siguiente »</a>
+  <a class="boton" href="{% url 'agenda:diaria_excel' %}?fecha={{ fecha|date:'Y-m-d' }}">⬇ Descargar Excel</a>
+</div>
+
+<table class="tabla-simple">
+  <thead>
+    <tr><th>Hora</th><th>Médico</th><th>Especialidad</th><th>Box</th><th>Estado</th></tr>
+  </thead>
+  <tbody>
+    {% for bloque in bloques %}
+    <tr>
+      <td>{{ bloque.hora_inicio|time:"H:i" }} - {{ bloque.hora_fin|time:"H:i" }}</td>
+      <td>{{ bloque.medico.nombre_completo }}</td>
+      <td>{{ bloque.especialidad|default:"—" }}</td>
+      <td>{{ bloque.box.nombre|default:"Sin asignar" }}</td>
+      <td>{{ bloque.get_estado_display }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No hay bloques de agenda para este día.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

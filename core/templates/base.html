@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}GestionCM{% endblock %} · GestionCM</title>
+  <link rel="stylesheet" href="{% static 'css/estilo.css' %}">
+</head>
+<body>
+  <div class="barra">
+    <a class="marca" href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}">GestionCM</a>
+    <nav>
+      {% if user.is_authenticated %}
+        {% if perms.medicos.view_medico %}<a href="{% url 'medicos:listar' %}">Médicos</a>{% endif %}
+        {% if perms.boxes.view_box %}<a href="{% url 'boxes:listar' %}">Boxes</a>{% endif %}
+        <a href="{% url 'boxes:distribucion' %}">Distribución</a>
+        <a href="{% url 'agenda:diaria' %}">Agenda diaria</a>
+        <span>{{ user.get_full_name|default:user.username }}</span>
+        <form method="post" action="{% url 'logout' %}" style="display:inline">
+          {% csrf_token %}
+          <button type="submit" class="boton secundario" style="padding:0.3rem 0.8rem;">Salir</button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}">Iniciar sesión</a>
+      {% endif %}
+    </nav>
+  </div>
+
+  <div class="{% block ancho_clase %}contenedor{% endblock %}">
+    {% if messages %}
+      <div class="mensajes">
+        {% for mensaje in messages %}
+          <div class="mensaje{% if mensaje.tags %} {{ mensaje.tags }}{% endif %}">{{ mensaje }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block contenido %}{% endblock %}
+  </div>
+
+  <div class="pie-pagina">GestionCM — Sistema de Gestión de Centro Médico</div>
+</body>
+</html>

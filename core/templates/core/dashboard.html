@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio{% endblock %}
+{% block contenido %}
+<h1>Hola, {{ user.first_name|default:user.username }}</h1>
+<div class="menu-principal">
+  {% for acceso in accesos %}
+    <a class="tarjeta" href="{% url acceso.url %}">
+      <div class="icono">{{ acceso.icono }}</div>
+      <h2>{{ acceso.titulo }}</h2>
+      <p>{{ acceso.descripcion }}</p>
+    </a>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titulo %}Médicos{% endblock %}
+{% block ancho_clase %}contenedor-ancho{% endblock %}
+{% block contenido %}
+<h1>Médicos</h1>
+
+<form method="get" style="margin-bottom:1rem;">
+  <input type="text" name="q" placeholder="Buscar por nombre..." value="{{ request.GET.q }}"
+         style="padding:0.5rem 0.7rem; border:1px solid var(--gris-borde); border-radius:8px; width:280px;">
+  <button class="boton secundario" type="submit">Buscar</button>
+</form>
+
+{% if perms.medicos.add_medico %}
+<div class="botones">
+  <a class="boton" href="{% url 'medicos:crear' %}">+ Nuevo médico</a>
+</div>
+{% endif %}
+
+<table class="tabla-simple">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>RUT</th>
+      <th>Especialidad(es)</th>
+      <th>Teléfono</th>
+      <th>Activo</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for medico in medicos %}
+    <tr>
+      <td>{{ medico.nombre_completo }}</td>
+      <td>{{ medico.rut }}</td>
+      <td>{% for e in medico.especialidades.all %}{{ e.nombre }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+      <td>{{ medico.telefono|default:"—" }}</td>
+      <td>{% if medico.activo %}Sí{% else %}No{% endif %}</td>
+      <td>
+        <a href="{% url 'medicos:boxes' medico.pk %}">Boxes</a>
+        {% if perms.medicos.change_medico %} · <a href="{% url 'medicos:editar' medico.pk %}">Editar</a>{% endif %}
+        {% if perms.medicos.delete_medico %} · <a href="{% url 'medicos:eliminar' medico.pk %}">Eliminar</a>{% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">No hay médicos registrados.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if is_paginated %}
+<div class="botones">
+  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">« Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Siguiente »</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

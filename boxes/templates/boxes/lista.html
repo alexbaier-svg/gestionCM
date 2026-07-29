@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Boxes{% endblock %}
+{% block ancho_clase %}contenedor-ancho{% endblock %}
+{% block contenido %}
+<h1>Boxes</h1>
+
+{% if perms.boxes.add_box %}
+<div class="botones">
+  <a class="boton" href="{% url 'boxes:crear' %}">+ Nuevo box</a>
+</div>
+{% endif %}
+
+<div class="pisos">
+  <div class="tarjeta">
+    <h2>Piso 1</h2>
+    {% include "boxes/_tabla_boxes.html" with lista=boxes_piso1 %}
+  </div>
+  <div class="tarjeta">
+    <h2>Piso 2</h2>
+    {% include "boxes/_tabla_boxes.html" with lista=boxes_piso2 %}
+  </div>
+</div>
+{% endblock %}

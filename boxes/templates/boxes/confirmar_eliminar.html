@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Eliminar box{% endblock %}
+{% block contenido %}
+<h1>Eliminar box</h1>
+<div class="tarjeta">
+  <p>¿Confirmas que quieres eliminar <strong>{{ object.nombre }}</strong>? Esta acción no se puede deshacer.</p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="botones">
+      <button class="boton peligro" type="submit">Sí, eliminar</button>
+      <a class="boton secundario" href="{% url 'boxes:listar' %}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

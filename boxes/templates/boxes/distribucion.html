@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}Distribución de boxes{% endblock %}
+{% block ancho_clase %}contenedor-ancho{% endblock %}
+{% block contenido %}
+<h1>Distribución de boxes</h1>
+<p>Médico asignado por defecto a cada box, según piso.</p>
+
+<div class="pisos">
+  <div class="tarjeta">
+    <h2>Piso 1</h2>
+    {% include "boxes/_grid_distribucion.html" with lista=piso1 %}
+  </div>
+  <div class="tarjeta">
+    <h2>Piso 2</h2>
+    {% include "boxes/_grid_distribucion.html" with lista=piso2 %}
+  </div>
+</div>
+{% endblock %}
