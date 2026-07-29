@@ -75,6 +75,10 @@ def distribucion(request):
     except (TypeError, ValueError):
         dia = datetime.date.today().weekday()
 
+    piso = request.GET.get("piso", "todos")
+    if piso not in ("1", "2", "todos"):
+        piso = "todos"
+
     boxes = sorted(Box.objects.filter(activo=True), key=_clave_orden)
     asignaciones = AsignacionBox.objects.select_related("medico", "box")
     por_box = {}
@@ -94,7 +98,8 @@ def distribucion(request):
     contexto = {
         "dia": dia,
         "dias_tab": list(enumerate(DIAS_SEMANA)),
-        "piso1": _preparar([b for b in boxes if b.piso == 1]),
-        "piso2": _preparar([b for b in boxes if b.piso == 2]),
+        "piso": piso,
+        "piso1": _preparar([b for b in boxes if b.piso == 1]) if piso in ("1", "todos") else None,
+        "piso2": _preparar([b for b in boxes if b.piso == 2]) if piso in ("2", "todos") else None,
     }
     return render(request, "boxes/distribucion.html", contexto)
