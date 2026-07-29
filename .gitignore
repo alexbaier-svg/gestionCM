@@ -17,12 +17,17 @@ media/
 .env.*
 !.env.example
 
-# Archivos de importación reales (pueden contener datos sensibles)
+# Archivos de importación/carga real (pueden contener datos sensibles o de contacto)
 *.csv
+*.xlsx
 !ejemplos/*.csv
+!ejemplos/*.xlsx
 
 # Editor / OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Claude Code local
+.claude/
