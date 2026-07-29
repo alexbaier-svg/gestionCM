@@ -12,6 +12,9 @@
   </form>
   <a class="boton secundario" href="?fecha={{ fecha_siguiente|date:'Y-m-d' }}">Día siguiente »</a>
   <a class="boton" href="{% url 'agenda:diaria_excel' %}?fecha={{ fecha|date:'Y-m-d' }}">⬇ Descargar Excel</a>
+  {% if perms.agenda.add_bloqueagenda %}
+  <a class="boton secundario" href="{% url 'agenda:importar' %}">⬆ Importar agenda</a>
+  {% endif %}
 </div>
 
 <table class="tabla-simple">

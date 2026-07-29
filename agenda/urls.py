@@ -7,4 +7,5 @@ app_name = "agenda"
 urlpatterns = [
     path("", views.agenda_diaria, name="diaria"),
     path("excel/", views.agenda_diaria_excel, name="diaria_excel"),
+    path("importar/", views.importar, name="importar"),
 ]

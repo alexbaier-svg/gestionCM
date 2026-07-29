@@ -1,10 +1,13 @@
 import datetime
 
-from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
-from .models import BloqueAgenda
+from .forms import ImportarAgendaForm
+from .importador import decodificar_bytes, importar_agenda_csv
+from .models import BloqueAgenda, ImportacionAgenda
 
 
 def _bloques_del_dia(request, fecha):
@@ -75,3 +78,40 @@ def agenda_diaria_excel(request):
     respuesta["Content-Disposition"] = f'attachment; filename="agenda_{fecha.isoformat()}.xlsx"'
     wb.save(respuesta)
     return respuesta
+
+
+@permission_required("agenda.add_bloqueagenda", raise_exception=True)
+def importar(request):
+    if request.method == "POST":
+        form = ImportarAgendaForm(request.POST, request.FILES)
+        if form.is_valid():
+            archivo = request.FILES["archivo"]
+            try:
+                texto = decodificar_bytes(archivo.read())
+            except UnicodeDecodeError:
+                messages.error(
+                    request,
+                    "No se pudo leer el archivo. Debe ser el CSV exportado tal cual, sin "
+                    "convertir su codificación.",
+                )
+                return render(request, "agenda/importar.html", {"form": form})
+
+            importacion = importar_agenda_csv(texto, archivo.name, request.user)
+            messages.success(
+                request,
+                f"Importación completa: {importacion.filas_procesadas} filas procesadas, "
+                f"{importacion.filas_omitidas} omitidas (recursos/equipos sin médico "
+                f"asociado, o citas ya importadas antes).",
+            )
+            primer_bloque = importacion.bloques.first()
+            if primer_bloque:
+                return redirect(f"/agenda/?fecha={primer_bloque.fecha.isoformat()}")
+            return redirect("agenda:diaria")
+    else:
+        form = ImportarAgendaForm()
+
+    importaciones_recientes = ImportacionAgenda.objects.order_by("-fecha_importacion")[:10]
+    return render(request, "agenda/importar.html", {
+        "form": form,
+        "importaciones_recientes": importaciones_recientes,
+    })

@@ -37,4 +37,11 @@ def dashboard(request):
         "url": "agenda:diaria",
         "icono": "📅",
     })
+    if request.user.has_perm("agenda.add_bloqueagenda"):
+        accesos.append({
+            "titulo": "Importar agenda",
+            "descripcion": "Subir el archivo de citas del otro sistema.",
+            "url": "agenda:importar",
+            "icono": "⬆️",
+        })
     return render(request, "core/dashboard.html", {"accesos": accesos})

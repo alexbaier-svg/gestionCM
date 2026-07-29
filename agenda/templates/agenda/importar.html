@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Importar agenda{% endblock %}
+{% block contenido %}
+<h1>Importar agenda desde archivo</h1>
+<p>Sube el archivo de citas exportado desde el otro sistema (ej. <code>ExportarCitas-20260728.csv</code>).
+Solo se cargan médico, especialidad, fecha/hora y estado de la cita — los datos del paciente
+(nombre, RUT, teléfono, etc.) se descartan automáticamente y no quedan guardados.</p>
+
+<div class="tarjeta">
+  <form class="formulario" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="boton" type="submit">Importar</button>
+  </form>
+</div>
+
+<div class="tarjeta">
+  <h2>Importaciones recientes</h2>
+  <table class="tabla-simple">
+    <thead><tr><th>Archivo</th><th>Fecha</th><th>Procesadas</th><th>Omitidas</th></tr></thead>
+    <tbody>
+      {% for i in importaciones_recientes %}
+      <tr>
+        <td>{{ i.archivo_nombre }}</td>
+        <td>{{ i.fecha_importacion|date:"d-m-Y H:i" }}</td>
+        <td>{{ i.filas_procesadas }}</td>
+        <td>{{ i.filas_omitidas }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">Sin importaciones todavía.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
