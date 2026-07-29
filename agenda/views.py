@@ -80,6 +80,7 @@ def agenda_diaria_excel(request):
     return respuesta
 
 
+@login_required
 @permission_required("agenda.add_bloqueagenda", raise_exception=True)
 def importar(request):
     if request.method == "POST":
