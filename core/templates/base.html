@@ -16,6 +16,7 @@
         {% if perms.boxes.view_box %}<a href="{% url 'boxes:listar' %}">Boxes</a>{% endif %}
         <a href="{% url 'boxes:distribucion' %}">Distribución</a>
         <a href="{% url 'agenda:diaria' %}">Agenda diaria</a>
+        {% if perms.auth.view_user %}<a href="{% url 'usuarios_listar' %}">Usuarios</a>{% endif %}
         <span>{{ user.get_full_name|default:user.username }}</span>
         <form method="post" action="{% url 'logout' %}" style="display:inline">
           {% csrf_token %}

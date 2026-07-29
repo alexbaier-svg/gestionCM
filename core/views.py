@@ -1,5 +1,13 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.models import User
+from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+
+from .forms import UsuarioForm
 
 
 def home(request):
@@ -44,4 +52,55 @@ def dashboard(request):
             "url": "agenda:importar",
             "icono": "⬆️",
         })
+    if request.user.has_perm("auth.view_user"):
+        accesos.append({
+            "titulo": "Usuarios",
+            "descripcion": "Crear cuentas y asignar roles.",
+            "url": "usuarios_listar",
+            "icono": "👤",
+        })
     return render(request, "core/dashboard.html", {"accesos": accesos})
+
+
+class UsuarioListView(PermissionRequiredMixin, ListView):
+    model = User
+    permission_required = "auth.view_user"
+    template_name = "core/usuarios_lista.html"
+    context_object_name = "usuarios"
+
+    def get_queryset(self):
+        return User.objects.all().order_by("username").prefetch_related("groups")
+
+
+class UsuarioCreateView(PermissionRequiredMixin, SuccessMessageMixin, CreateView):
+    model = User
+    form_class = UsuarioForm
+    permission_required = "auth.add_user"
+    template_name = "core/usuario_formulario.html"
+    success_url = reverse_lazy("usuarios_listar")
+    success_message = "Usuario creado correctamente."
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["es_nuevo"] = True
+        return kwargs
+
+
+class UsuarioUpdateView(PermissionRequiredMixin, SuccessMessageMixin, UpdateView):
+    model = User
+    form_class = UsuarioForm
+    permission_required = "auth.change_user"
+    template_name = "core/usuario_formulario.html"
+    success_url = reverse_lazy("usuarios_listar")
+    success_message = "Usuario actualizado correctamente."
+
+
+class UsuarioDeleteView(PermissionRequiredMixin, DeleteView):
+    model = User
+    permission_required = "auth.delete_user"
+    template_name = "core/usuario_confirmar_eliminar.html"
+    success_url = reverse_lazy("usuarios_listar")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Usuario eliminado.")
+        return super().form_valid(form)

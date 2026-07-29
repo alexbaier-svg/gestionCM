@@ -4,14 +4,14 @@ permisos base. Idempotente: se puede volver a ejecutar sin duplicar nada.
 Uso: python manage.py configurar_roles
 """
 
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group, Permission, User
 from django.core.management.base import BaseCommand
 
 from agenda.models import BloqueAgenda, ImportacionAgenda
 from boxes.models import AsignacionBox, Box
 from medicos.models import Especialidad, Medico
 
-ADMIN_MODELOS = [Medico, Especialidad, Box, AsignacionBox, BloqueAgenda, ImportacionAgenda]
+ADMIN_MODELOS = [Medico, Especialidad, Box, AsignacionBox, BloqueAgenda, ImportacionAgenda, User]
 ADMIN_ACCIONES = ["add", "change", "delete", "view"]
 
 RECEPCION_PERMISOS = [
