@@ -10,11 +10,10 @@
   <button class="boton secundario" type="submit">Buscar</button>
 </form>
 
-{% if perms.medicos.add_medico %}
 <div class="botones">
-  <a class="boton" href="{% url 'medicos:crear' %}">+ Nuevo médico</a>
+  {% if perms.medicos.add_medico %}<a class="boton" href="{% url 'medicos:crear' %}">+ Nuevo médico</a>{% endif %}
+  {% if perms.medicos.view_especialidad %}<a class="boton secundario" href="{% url 'medicos:especialidades' %}">Especialidades</a>{% endif %}
 </div>
-{% endif %}
 
 <table class="tabla-simple">
   <thead>

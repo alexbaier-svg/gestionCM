@@ -7,8 +7,8 @@ from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
 from boxes.models import AsignacionBox, Box
 
-from .forms import MedicoForm
-from .models import Medico
+from .forms import EspecialidadForm, MedicoForm
+from .models import Especialidad, Medico
 
 DIAS_SEMANA = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
 
@@ -54,6 +54,45 @@ class MedicoDeleteView(PermissionRequiredMixin, DeleteView):
 
     def form_valid(self, form):
         messages.success(self.request, "Médico eliminado.")
+        return super().form_valid(form)
+
+
+class EspecialidadListView(PermissionRequiredMixin, ListView):
+    model = Especialidad
+    permission_required = "medicos.view_especialidad"
+    template_name = "medicos/especialidades_lista.html"
+    context_object_name = "especialidades"
+
+    def get_queryset(self):
+        return Especialidad.objects.all().order_by("nombre")
+
+
+class EspecialidadCreateView(PermissionRequiredMixin, SuccessMessageMixin, CreateView):
+    model = Especialidad
+    form_class = EspecialidadForm
+    permission_required = "medicos.add_especialidad"
+    template_name = "medicos/especialidad_formulario.html"
+    success_url = reverse_lazy("medicos:especialidades")
+    success_message = "Especialidad creada correctamente."
+
+
+class EspecialidadUpdateView(PermissionRequiredMixin, SuccessMessageMixin, UpdateView):
+    model = Especialidad
+    form_class = EspecialidadForm
+    permission_required = "medicos.change_especialidad"
+    template_name = "medicos/especialidad_formulario.html"
+    success_url = reverse_lazy("medicos:especialidades")
+    success_message = "Especialidad actualizada correctamente."
+
+
+class EspecialidadDeleteView(PermissionRequiredMixin, DeleteView):
+    model = Especialidad
+    permission_required = "medicos.delete_especialidad"
+    template_name = "medicos/especialidad_confirmar_eliminar.html"
+    success_url = reverse_lazy("medicos:especialidades")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Especialidad eliminada.")
         return super().form_valid(form)
 
 

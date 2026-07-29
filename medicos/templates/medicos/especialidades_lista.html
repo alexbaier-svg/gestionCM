@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titulo %}Especialidades{% endblock %}
+{% block contenido %}
+<h1>Especialidades</h1>
+<p><a href="{% url 'medicos:listar' %}">« Volver a médicos</a></p>
+
+{% if perms.medicos.add_especialidad %}
+<div class="botones">
+  <a class="boton" href="{% url 'medicos:especialidad_crear' %}">+ Nueva especialidad</a>
+</div>
+{% endif %}
+
+<table class="tabla-simple">
+  <thead><tr><th>Nombre</th><th></th></tr></thead>
+  <tbody>
+    {% for especialidad in especialidades %}
+    <tr>
+      <td>{{ especialidad.nombre }}</td>
+      <td>
+        {% if perms.medicos.change_especialidad %}<a href="{% url 'medicos:especialidad_editar' especialidad.pk %}">Editar</a>{% endif %}
+        {% if perms.medicos.delete_especialidad %} · <a href="{% url 'medicos:especialidad_eliminar' especialidad.pk %}">Eliminar</a>{% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="2">No hay especialidades registradas.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

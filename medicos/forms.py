@@ -1,6 +1,13 @@
 from django import forms
 
-from .models import Medico
+from .models import Especialidad, Medico
+
+
+class EspecialidadForm(forms.ModelForm):
+    class Meta:
+        model = Especialidad
+        fields = ["nombre"]
+        labels = {"nombre": "Nombre"}
 
 
 class MedicoForm(forms.ModelForm):
