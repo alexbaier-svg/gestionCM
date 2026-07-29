@@ -6,6 +6,12 @@
 <p>Horas en que cada box está ocupado según la oferta de los médicos (8:00 a 20:00), descontando sus bloqueos.</p>
 
 <div class="botones">
+  <a class="boton secundario" href="{% url 'disponibilidad:alertas' %}">⚠ Alertas de bloqueos</a>
+  {% if perms.disponibilidad.add_ofertamedico %}<a class="boton secundario" href="{% url 'disponibilidad:importar_oferta' %}">⬆ Importar oferta</a>{% endif %}
+  {% if perms.disponibilidad.add_bloqueomedico %}<a class="boton secundario" href="{% url 'disponibilidad:importar_bloqueos' %}">⬆ Importar bloqueos</a>{% endif %}
+</div>
+
+<div class="botones">
   {% for i, nombre in dias_tab %}
     {% if i == dia %}
       <span class="boton">{{ nombre }}</span>
