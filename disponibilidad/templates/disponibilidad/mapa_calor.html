@@ -7,8 +7,9 @@
 
 <div class="botones">
   <a class="boton secundario" href="{% url 'disponibilidad:alertas' %}">⚠ Alertas de bloqueos</a>
-  {% if perms.disponibilidad.add_ofertamedico %}<a class="boton secundario" href="{% url 'disponibilidad:importar_oferta' %}">⬆ Importar oferta</a>{% endif %}
-  {% if perms.disponibilidad.add_bloqueomedico %}<a class="boton secundario" href="{% url 'disponibilidad:importar_bloqueos' %}">⬆ Importar bloqueos</a>{% endif %}
+  {% if perms.disponibilidad.add_ofertamedico or perms.disponibilidad.add_bloqueomedico %}
+  <a class="boton secundario" href="{% url 'importaciones' %}">⬆ Importaciones</a>
+  {% endif %}
 </div>
 
 <div class="botones">

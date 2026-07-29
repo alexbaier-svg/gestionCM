@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}Importaciones{% endblock %}
+{% block contenido %}
+<h1>Importaciones</h1>
+<p>Sube aquí los archivos exportados desde el otro sistema.</p>
+
+<div class="menu-principal">
+  {% for opcion in opciones %}
+    <a class="tarjeta" href="{% url opcion.url %}">
+      <div class="icono">{{ opcion.icono }}</div>
+      <h2>{{ opcion.titulo }}</h2>
+      <p>{{ opcion.descripcion }}</p>
+    </a>
+  {% empty %}
+    <p>No tienes permiso para importar archivos.</p>
+  {% endfor %}
+</div>
+{% endblock %}

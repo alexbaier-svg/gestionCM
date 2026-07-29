@@ -8,6 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', core_views.home, name='home'),
     path('inicio/', core_views.dashboard, name='dashboard'),
+    path('importaciones/', core_views.importaciones, name='importaciones'),
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('usuarios/', core_views.UsuarioListView.as_view(), name='usuarios_listar'),

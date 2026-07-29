@@ -2,7 +2,7 @@
 {% block titulo %}Importar oferta{% endblock %}
 {% block contenido %}
 <h1>Importar oferta de médicos</h1>
-<p><a href="{% url 'disponibilidad:mapa_calor' %}">« Volver al mapa de calor</a></p>
+<p><a href="{% url 'importaciones' %}">« Volver a Importaciones</a> · <a href="{% url 'disponibilidad:mapa_calor' %}">Ver mapa de calor</a></p>
 <p>Sube el archivo con los horarios en que cada médico atiende (ej. <code>ExportarOferta-20260729.xlsx</code>).
 Al importar, se reemplaza toda la oferta anterior por la de este archivo (representa el estado vigente).</p>
 

@@ -45,31 +45,21 @@ def dashboard(request):
         "url": "agenda:diaria",
         "icono": "📅",
     })
-    if request.user.has_perm("agenda.add_bloqueagenda"):
-        accesos.append({
-            "titulo": "Importar agenda",
-            "descripcion": "Subir el archivo de citas del otro sistema.",
-            "url": "agenda:importar",
-            "icono": "⬆️",
-        })
     accesos.append({
         "titulo": "Ocupación de boxes",
         "descripcion": "Mapa de calor: horas ocupadas según oferta y bloqueos.",
         "url": "disponibilidad:mapa_calor",
         "icono": "🔥",
     })
-    if request.user.has_perm("disponibilidad.add_ofertamedico"):
+    if (
+        request.user.has_perm("agenda.add_bloqueagenda")
+        or request.user.has_perm("disponibilidad.add_ofertamedico")
+        or request.user.has_perm("disponibilidad.add_bloqueomedico")
+    ):
         accesos.append({
-            "titulo": "Importar oferta",
-            "descripcion": "Subir el archivo de horarios de atención de los médicos.",
-            "url": "disponibilidad:importar_oferta",
-            "icono": "⬆️",
-        })
-    if request.user.has_perm("disponibilidad.add_bloqueomedico"):
-        accesos.append({
-            "titulo": "Importar bloqueos",
-            "descripcion": "Subir el archivo de ausencias de los médicos.",
-            "url": "disponibilidad:importar_bloqueos",
+            "titulo": "Importaciones",
+            "descripcion": "Subir agenda, oferta o bloqueos desde el otro sistema.",
+            "url": "importaciones",
             "icono": "⬆️",
         })
     if request.user.has_perm("auth.view_user"):
@@ -80,6 +70,33 @@ def dashboard(request):
             "icono": "👤",
         })
     return render(request, "core/dashboard.html", {"accesos": accesos})
+
+
+@login_required
+def importaciones(request):
+    opciones = []
+    if request.user.has_perm("agenda.add_bloqueagenda"):
+        opciones.append({
+            "titulo": "Agenda diaria",
+            "descripcion": "Sube el archivo de citas del día (ExportarCitas).",
+            "url": "agenda:importar",
+            "icono": "📅",
+        })
+    if request.user.has_perm("disponibilidad.add_ofertamedico"):
+        opciones.append({
+            "titulo": "Oferta de médicos",
+            "descripcion": "Sube el archivo de horarios de atención (ExportarOferta).",
+            "url": "disponibilidad:importar_oferta",
+            "icono": "🕒",
+        })
+    if request.user.has_perm("disponibilidad.add_bloqueomedico"):
+        opciones.append({
+            "titulo": "Bloqueos de médicos",
+            "descripcion": "Sube el archivo de ausencias (ExportarBloqueos).",
+            "url": "disponibilidad:importar_bloqueos",
+            "icono": "🚫",
+        })
+    return render(request, "core/importaciones.html", {"opciones": opciones})
 
 
 class UsuarioListView(PermissionRequiredMixin, ListView):

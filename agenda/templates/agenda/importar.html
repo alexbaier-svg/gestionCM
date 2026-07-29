@@ -2,6 +2,7 @@
 {% block titulo %}Importar agenda{% endblock %}
 {% block contenido %}
 <h1>Importar agenda desde archivo</h1>
+<p><a href="{% url 'importaciones' %}">« Volver a Importaciones</a></p>
 <p>Sube el archivo de citas exportado desde el otro sistema (ej. <code>ExportarCitas-20260728.csv</code>).
 Solo se cargan médico, especialidad, fecha/hora y estado de la cita — los datos del paciente
 (nombre, RUT, teléfono, etc.) se descartan automáticamente y no quedan guardados.</p>
