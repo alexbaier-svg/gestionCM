@@ -163,10 +163,16 @@ form.formulario .errorlist { color: var(--rojo); padding-left: 1rem; margin: 0.2
 }
 .box-tarjeta .medico {
   color: var(--texto-suave);
-  font-size: 0.9rem;
+  font-size: 0.76rem;
   padding: 0.3rem 0;
 }
 .box-tarjeta .medico + .medico { border-top: 1px dashed var(--gris-borde); }
+.box-tarjeta .medico .horario {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--azul);
+  margin-top: 0.1rem;
+}
 .box-tarjeta.vacio { opacity: 0.6; }
 .medico-badge {
   display: inline-flex;

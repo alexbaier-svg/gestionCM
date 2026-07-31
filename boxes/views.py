@@ -9,6 +9,8 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
+from disponibilidad.models import OfertaMedico
+
 from .forms import BoxForm
 from .models import AsignacionBox, Box
 
@@ -85,12 +87,24 @@ def distribucion(request):
     for a in asignaciones:
         por_box.setdefault(a.box_id, []).append(a)
 
+    ofertas_por_medico = {}
+    for o in OfertaMedico.objects.filter(dia_semana=dia).order_by("hora_inicio"):
+        ofertas_por_medico.setdefault(o.medico_id, []).append(o)
+
+    def _horario_medico(medico_id):
+        ofertas = ofertas_por_medico.get(medico_id)
+        if not ofertas:
+            return ""
+        return ", ".join(f"{o.hora_inicio:%H:%M}-{o.hora_fin:%H:%M}" for o in ofertas)
+
     def _medicos_ese_dia(box):
         reglas = por_box.get(box.id, [])
-        especificas = [a.medico.nombre_completo for a in reglas if a.dia_semana == dia]
-        if especificas:
-            return especificas
-        return [a.medico.nombre_completo for a in reglas if a.dia_semana is None]
+        especificas = [a.medico for a in reglas if a.dia_semana == dia]
+        medicos = especificas if especificas else [a.medico for a in reglas if a.dia_semana is None]
+        return [
+            {"nombre": m.nombre_completo, "horario": _horario_medico(m.id)}
+            for m in medicos
+        ]
 
     def _preparar(lista_boxes):
         return [{"box": box, "medicos": _medicos_ese_dia(box)} for box in lista_boxes]
