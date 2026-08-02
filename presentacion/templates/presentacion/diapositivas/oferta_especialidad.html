@@ -1,0 +1,40 @@
+<h2 class="titulo-diapo">Oferta por Especialidad — Agosto 2026</h2>
+<p class="subtitulo-diapo">Período: {{ d.periodo }}</p>
+
+<div class="kpi-grid">
+  {% for kpi in d.kpis %}
+  <div class="kpi-card" style="--kpi-color: {{ kpi.color }};">
+    <div class="kpi-etiqueta">{{ kpi.etiqueta }}</div>
+    <div class="kpi-valor">{{ kpi.valor }}</div>
+    {% if kpi.detalle %}<div class="kpi-detalle" style="color: {{ kpi.detalle_color }};">{{ kpi.detalle }}</div>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="tabla-diapo-contenedor">
+  <table class="tabla-diapo">
+    <thead>
+      <tr><th>Especialidad</th><th>Oferta Bruta</th><th>Oferta Efectiva</th><th>Bloqueos</th><th>% Bloqueos</th></tr>
+    </thead>
+    <tbody>
+      {% for fila in d.filas %}
+      <tr>
+        <td>{{ fila.especialidad }}</td>
+        <td>{{ fila.bruta }}</td>
+        <td>{{ fila.efectiva }}</td>
+        <td>{{ fila.bloqueos }}</td>
+        <td>{{ fila.pct }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr class="fila-total">
+        <td>{{ d.total.especialidad }}</td>
+        <td>{{ d.total.bruta }}</td>
+        <td>{{ d.total.efectiva }}</td>
+        <td>{{ d.total.bloqueos }}</td>
+        <td>{{ d.total.pct }}</td>
+      </tr>
+    </tfoot>
+  </table>
+</div>

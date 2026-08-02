@@ -1,0 +1,35 @@
+<h2 class="titulo-diapo">Comparativo Julio vs. Agosto 2026</h2>
+
+<div class="grafico-barras">
+  {% for grupo in d.grafico %}
+  <div class="grupo-categoria">
+    <div class="barras-del-grupo">
+      {% for barra in grupo.barras %}
+        <div class="grafico-barra" style="height: {{ barra.alto_pct }}%; background: {{ barra.color }};">
+          <span>{{ barra.valor }}</span>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="categoria-label">{{ grupo.categoria }}</div>
+  </div>
+  {% endfor %}
+</div>
+<div class="leyenda-series">
+  {% for serie in d.series %}
+    <div class="leyenda-item"><span class="leyenda-swatch" style="background:{{ serie.color }};"></span>{{ serie.nombre }}</div>
+  {% endfor %}
+</div>
+
+<div class="kpi-grid">
+  {% for kpi in d.kpis %}
+  <div class="kpi-card" style="--kpi-color: {{ kpi.color }};">
+    <div class="kpi-etiqueta">{{ kpi.etiqueta }}</div>
+    <div class="kpi-valor">{{ kpi.valor }}</div>
+  </div>
+  {% endfor %}
+  <div class="kpi-card destacado">
+    <div class="kpi-etiqueta">{{ d.kpi_destacado.etiqueta }}</div>
+    <div class="kpi-valor">{{ d.kpi_destacado.valor }}</div>
+    <div class="kpi-detalle-claro">{{ d.kpi_destacado.detalle }}</div>
+  </div>
+</div>

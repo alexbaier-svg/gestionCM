@@ -1,0 +1,22 @@
+<h2 class="titulo-diapo">Experiencia Paciente</h2>
+
+{% for grupo in d.grupos %}
+<div class="grafico-barras grafico-barras--pct">
+  {% for serie in grupo.series %}
+  <div class="grupo-categoria">
+    <div class="barras-del-grupo">
+      <div class="grafico-barra" style="height: {{ serie.pct }}%; background: {{ serie.color }}; color: {{ serie.color_texto|default:'#fff' }};">
+        <span>{{ serie.pct }}%</span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<div class="leyenda-series">
+  {% for serie in grupo.series %}
+    <div class="leyenda-item"><span class="leyenda-swatch" style="background:{{ serie.color }};"></span>{{ serie.etiqueta }}</div>
+  {% endfor %}
+</div>
+<p class="categoria-label" style="margin-top:0.5rem;">{{ grupo.nombre }}</p>
+<p class="subtitulo-diapo" style="text-align:center;">{{ grupo.detalle }}</p>
+{% endfor %}

@@ -20,8 +20,10 @@ media/
 # Archivos de importación/carga real (pueden contener datos sensibles o de contacto)
 *.csv
 *.xlsx
+*.pptx
 !ejemplos/*.csv
 !ejemplos/*.xlsx
+!ejemplos/*.pptx
 
 # Editor / OS
 .vscode/

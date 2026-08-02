@@ -1,0 +1,21 @@
+<h2 class="titulo-diapo">Ocupación Infraestructura</h2>
+
+<div class="stat-grande-grupo">
+  <div class="stat-grande">
+    <div class="stat-grande-etiqueta">Julio</div>
+    <div class="stat-grande-valor">{{ d.julio_pct }}%</div>
+  </div>
+  <div class="stat-grande">
+    <div class="stat-grande-etiqueta">Agosto</div>
+    <div class="stat-grande-valor">{{ d.agosto_pct }}%</div>
+  </div>
+</div>
+
+<div class="lista-destacados">
+  <h3>Ingresos en Agosto:</h3>
+  <ul>
+    {% for item in d.ingresos %}
+      <li>{{ item.nombre }} ({{ item.consultas }} consultas)</li>
+    {% endfor %}
+  </ul>
+</div>

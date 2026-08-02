@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block ancho_clase %}contenedor-ancho{% endblock %}
+{% block contenido %}
+<div class="presentacion">
+  <div class="presentacion-barra">
+    <span>Reunión semanal — diapositiva {{ numero }} de {{ total }}</span>
+    <div class="presentacion-puntos">
+      {% for i in indices %}
+        <a href="?diapositiva={{ i }}" class="punto{% if i == numero %} activo{% endif %}"></a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="diapositiva">
+    {% include plantilla_diapositiva with d=datos %}
+  </div>
+
+  <div class="presentacion-navegacion">
+    {% if anterior %}
+      <a class="boton secundario" href="?diapositiva={{ anterior }}">« Anterior</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+    {% if siguiente %}
+      <a class="boton" href="?diapositiva={{ siguiente }}">Siguiente »</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

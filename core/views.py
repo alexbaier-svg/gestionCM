@@ -62,6 +62,13 @@ def dashboard(request):
             "url": "importaciones",
             "icono": "⬆️",
         })
+    if request.user.is_superuser or request.user.groups.filter(name="Administrador").exists():
+        accesos.append({
+            "titulo": "Reunión semanal",
+            "descripcion": "Presentación de indicadores para la reunión semanal.",
+            "url": "presentacion:visor",
+            "icono": "📊",
+        })
     if request.user.has_perm("auth.view_user"):
         accesos.append({
             "titulo": "Usuarios",
