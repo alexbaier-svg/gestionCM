@@ -294,7 +294,8 @@ table.mapa-calor td.celda-libre, .celda-leyenda.celda-libre {
 
 .lista-destacados { margin-top: 1.5rem; color: #333333; }
 .lista-destacados h3 { font-size: 1rem; color: #1E2761; margin-bottom: 0.5rem; }
-.lista-destacados ul { margin: 0; padding-left: 1.2rem; }
+.lista-destacados ul, .lista-destacados ol { margin: 0; padding-left: 1.2rem; }
+.lista-destacados li { margin: 0.15rem 0; }
 .lista-destacados p { margin: 0.4rem 0; }
 
 .kpi-grid {
@@ -346,15 +347,18 @@ table.tabla-diapo tr.fila-total td { font-weight: 700; background: #F4F6FB; bord
 .grafico-barras--pct { gap: 2rem; }
 .grupo-categoria { display: flex; flex-direction: column; align-items: center; }
 .barras-del-grupo { display: flex; align-items: flex-end; gap: 0.4rem; height: 190px; }
+.barra-columna {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+.barra-valor { font-size: 0.75rem; font-weight: 700; color: #23282e; margin-bottom: 0.25rem; }
 .grafico-barra {
   width: 42px;
   border-radius: 6px 6px 0 0;
-  display: flex;
-  justify-content: center;
-  padding-top: 0.3rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #fff;
+  min-height: 2px;
 }
 .categoria-label { margin-top: 0.5rem; font-size: 0.85rem; color: #333333; text-align: center; }
 .leyenda-series { display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.75rem; }

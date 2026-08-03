@@ -25,6 +25,12 @@ def obtener_diapositivas():
                     {"nombre": "Neurología Infantil", "consultas": 29},
                     {"nombre": "TMT caderas", "consultas": 24},
                 ],
+                "futuros_ingresos": [
+                    "Neurología adulto-infantil: 24 consultas mensuales",
+                    "Medicina Interna",
+                    "Pediatría",
+                    "Cirugía Bariátrica",
+                ],
             },
         },
         {
@@ -69,7 +75,7 @@ def obtener_diapositivas():
             },
         },
         {
-            "titulo": "Comparativo Julio vs. Agosto 2026",
+            "titulo": "Comparativo Oferta Julio / Agosto",
             "plantilla": "presentacion/diapositivas/comparativo_mensual.html",
             "contexto": {
                 "categorias": ["Oferta Bruta", "Oferta Efectiva", "Bloqueos"],
@@ -112,7 +118,7 @@ def obtener_diapositivas():
                         "series": [
                             {"etiqueta": "Total", "pct": 86, "color": NAVY},
                             {"etiqueta": "ACHS", "pct": 89, "color": TEAL},
-                            {"etiqueta": "No Ley", "pct": 86, "color": LILA, "color_texto": NAVY},
+                            {"etiqueta": "No Ley", "pct": 86, "color": LILA},
                         ],
                     },
                 ],

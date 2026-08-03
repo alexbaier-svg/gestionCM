@@ -5,8 +5,9 @@
   {% for serie in grupo.series %}
   <div class="grupo-categoria">
     <div class="barras-del-grupo">
-      <div class="grafico-barra" style="height: {{ serie.pct }}%; background: {{ serie.color }}; color: {{ serie.color_texto|default:'#fff' }};">
-        <span>{{ serie.pct }}%</span>
+      <div class="barra-columna">
+        <span class="barra-valor">{{ serie.pct }}%</span>
+        <div class="grafico-barra" style="height: {{ serie.pct }}%; background: {{ serie.color }};"></div>
       </div>
     </div>
   </div>
