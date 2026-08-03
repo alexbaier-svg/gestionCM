@@ -8,7 +8,7 @@
       {% for barra in grupo.barras %}
         <div class="barra-columna">
           <span class="barra-valor">{{ barra.valor }}</span>
-          <div class="grafico-barra" style="height: {{ barra.alto_pct }}%; background: {{ barra.color }};"></div>
+          <div class="grafico-barra" style="height: {{ barra.alto_px }}px; background: {{ barra.color }};"></div>
         </div>
       {% endfor %}
     </div>
