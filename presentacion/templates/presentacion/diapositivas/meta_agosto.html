@@ -1,0 +1,15 @@
+<h2 class="titulo-diapo">Meta Agosto</h2>
+
+<div class="kpi-grid">
+  {% for kpi in d.kpis %}
+  <div class="kpi-card" style="--kpi-color: {{ kpi.color }};">
+    <div class="kpi-etiqueta">{{ kpi.etiqueta }}</div>
+    <div class="kpi-valor">{{ kpi.valor }}</div>
+  </div>
+  {% endfor %}
+  <div class="kpi-card destacado">
+    <div class="kpi-etiqueta">{{ d.kpi_destacado.etiqueta }}</div>
+    <div class="kpi-valor">{{ d.kpi_destacado.valor }}</div>
+    <div class="kpi-detalle-claro">{{ d.kpi_destacado.detalle }}</div>
+  </div>
+</div>

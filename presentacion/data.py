@@ -108,6 +108,21 @@ def obtener_diapositivas():
             },
         },
         {
+            "titulo": "Meta Agosto",
+            "plantilla": "presentacion/diapositivas/meta_agosto.html",
+            "contexto": {
+                "kpis": [
+                    {"etiqueta": "META AGOSTO", "valor": "10.849", "color": NAVY},
+                    {"etiqueta": "VENTA MÁS ALTA — AGOSTO 2025", "valor": "513", "color": NAVY},
+                ],
+                "kpi_destacado": {
+                    "etiqueta": "CONSULTAS DIARIAS NECESARIAS",
+                    "valor": "515",
+                    "detalle": "A la fecha, para cumplir la meta de agosto",
+                },
+            },
+        },
+        {
             "titulo": "Experiencia Paciente",
             "plantilla": "presentacion/diapositivas/experiencia_paciente.html",
             "contexto": {
