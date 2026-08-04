@@ -147,7 +147,7 @@ def obtener_diapositivas():
                 "julio_pct": "62,73%",
                 "promedio_previo": "Promedio de Enero a Mayo: 56%",
                 "nota": "La variación positiva responde a la gestión comercial en homologar "
-                        "codificación (Banmédica).",
+                        "codificación (Nueva Más Vida).",
             },
         },
     ]
