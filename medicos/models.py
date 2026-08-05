@@ -23,6 +23,10 @@ class Medico(models.Model):
     especialidades = models.ManyToManyField(Especialidad, related_name="medicos", blank=True)
     telefono = models.CharField(max_length=30, blank=True)
     email = models.EmailField(blank=True)
+    duracion_consulta_min = models.PositiveSmallIntegerField(
+        "Duración de consulta (min)", default=15,
+        help_text="Usada para estimar cuántas citas caben en su oferta horaria de un día.",
+    )
     activo = models.BooleanField(default=True)
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL,

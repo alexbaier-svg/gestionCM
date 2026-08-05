@@ -21,7 +21,10 @@
   <h2>Resumen por médico</h2>
   <table class="tabla-simple">
     <thead>
-      <tr><th>Médico</th><th>Box</th><th>Turno</th><th>Hora mín. desde</th><th>Hora máx. hasta</th><th>Cantidad de citas</th></tr>
+      <tr>
+        <th>Médico</th><th>Box</th><th>Turno</th><th>Hora mín. desde</th><th>Hora máx. hasta</th>
+        <th>Cantidad de citas</th><th>Oferta (citas)</th><th>No agendadas</th>
+      </tr>
     </thead>
     <tbody>
       {% for fila in resumen %}
@@ -32,20 +35,29 @@
         <td>{{ fila.hora_min|time:"H:i" }}</td>
         <td>{{ fila.hora_max|time:"H:i" }}</td>
         <td>{{ fila.cantidad }}</td>
+        <td>{{ fila.oferta_citas }}</td>
+        <td>{{ fila.no_agendadas }}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="6">No hay bloques de agenda para este día.</td></tr>
+      <tr><td colspan="8">No hay bloques de agenda para este día.</td></tr>
       {% endfor %}
     </tbody>
     {% if resumen %}
     <tfoot>
       <tr>
-        <td colspan="5" style="text-align:right; font-weight:600;">Total citas</td>
+        <td colspan="5" style="text-align:right; font-weight:600;">Total</td>
         <td style="font-weight:600;">{{ total_citas }}</td>
+        <td style="font-weight:600;">{{ total_oferta }}</td>
+        <td style="font-weight:600;">{{ total_no_agendadas }}</td>
       </tr>
     </tfoot>
     {% endif %}
   </table>
+  <p style="margin-top:0.5rem; color:var(--texto-suave); font-size:0.9rem;">
+    "Oferta (citas)" estima cuántas citas caben según la oferta horaria del médico ese día
+    (descontando bloqueos) y su duración de consulta habitual. "No agendadas" = oferta menos
+    citas realmente agendadas (incluye anuladas).
+  </p>
 </div>
 
 <div class="tarjeta">

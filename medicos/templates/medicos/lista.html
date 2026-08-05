@@ -22,6 +22,7 @@
       <th>RUT</th>
       <th>Especialidad(es)</th>
       <th>Teléfono</th>
+      <th>Duración cita</th>
       <th>Activo</th>
       <th></th>
     </tr>
@@ -33,6 +34,7 @@
       <td>{{ medico.rut }}</td>
       <td>{% for e in medico.especialidades.all %}{{ e.nombre }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
       <td>{{ medico.telefono|default:"—" }}</td>
+      <td>{{ medico.duracion_consulta_min }} min</td>
       <td>{% if medico.activo %}Sí{% else %}No{% endif %}</td>
       <td>
         <a href="{% url 'medicos:boxes' medico.pk %}">Boxes</a>
@@ -41,7 +43,7 @@
       </td>
     </tr>
     {% empty %}
-    <tr><td colspan="6">No hay médicos registrados.</td></tr>
+    <tr><td colspan="7">No hay médicos registrados.</td></tr>
     {% endfor %}
   </tbody>
 </table>

@@ -13,7 +13,10 @@ class EspecialidadForm(forms.ModelForm):
 class MedicoForm(forms.ModelForm):
     class Meta:
         model = Medico
-        fields = ["nombre_completo", "rut", "especialidades", "telefono", "email", "activo"]
+        fields = [
+            "nombre_completo", "rut", "especialidades", "telefono", "email",
+            "duracion_consulta_min", "activo",
+        ]
         widgets = {
             "especialidades": forms.CheckboxSelectMultiple,
         }
@@ -23,5 +26,6 @@ class MedicoForm(forms.ModelForm):
             "especialidades": "Especialidad(es)",
             "telefono": "Teléfono",
             "email": "Correo electrónico",
+            "duracion_consulta_min": "Duración de consulta (minutos)",
             "activo": "Activo",
         }
