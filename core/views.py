@@ -51,6 +51,12 @@ def dashboard(request):
         "url": "disponibilidad:mapa_calor",
         "icono": "🔥",
     })
+    accesos.append({
+        "titulo": "Oferta",
+        "descripcion": "Cuántas citas caben por médico y día de la semana.",
+        "url": "disponibilidad:oferta_por_medico",
+        "icono": "📈",
+    })
     if (
         request.user.has_perm("agenda.add_bloqueagenda")
         or request.user.has_perm("disponibilidad.add_ofertamedico")

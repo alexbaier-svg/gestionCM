@@ -364,3 +364,31 @@ table.tabla-diapo tr.fila-total td { font-weight: 700; background: #F4F6FB; bord
 .leyenda-series { display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.75rem; }
 .leyenda-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #333333; }
 .leyenda-swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+table.tabla-oferta {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.85rem;
+}
+table.tabla-oferta th, table.tabla-oferta td {
+  border-bottom: 1px solid var(--gris-borde);
+  padding: 0.4rem 0.7rem;
+  text-align: center;
+  white-space: nowrap;
+}
+table.tabla-oferta th {
+  background: #eef1f4;
+  font-weight: 600;
+}
+table.tabla-oferta .col-medico {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 1;
+}
+table.tabla-oferta th.col-medico { background: #eef1f4; z-index: 2; }
+table.tabla-oferta tr:hover td { background: #fafbfc; }
+table.tabla-oferta tr:hover td.col-medico { background: #f5f6f8; }
+table.tabla-oferta td.sin-oferta { color: var(--texto-suave); }
+.bloqueos-cita { color: var(--rojo); font-size: 0.78rem; }

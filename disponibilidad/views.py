@@ -7,7 +7,9 @@ from django.shortcuts import redirect, render
 
 from boxes.models import AsignacionBox, Box
 from boxes.views import _clave_orden
+from medicos.models import Medico
 
+from .calculos import minutos_brutos, minutos_libres
 from .forms import ImportarBloqueosForm, ImportarOfertaForm
 from .importador import importar_bloqueos_xlsx, importar_oferta_xlsx
 from .models import BloqueoMedico, OfertaMedico
@@ -98,6 +100,45 @@ def mapa_calor(request):
         "filas": filas,
     }
     return render(request, "disponibilidad/mapa_calor.html", contexto)
+
+
+@login_required
+def oferta_por_medico(request):
+    q = request.GET.get("q", "").strip()
+    medicos = Medico.objects.filter(activo=True)
+    if q:
+        medicos = medicos.filter(nombre_completo__icontains=q)
+    medicos = medicos.order_by("nombre_completo")
+
+    ofertas_por_medico = defaultdict(lambda: defaultdict(list))
+    for o in OfertaMedico.objects.all():
+        ofertas_por_medico[o.medico_id][o.dia_semana].append(o)
+
+    bloqueos_por_medico = defaultdict(lambda: defaultdict(list))
+    for b in BloqueoMedico.objects.all():
+        bloqueos_por_medico[b.medico_id][b.dia_semana].append(b)
+
+    filas = []
+    for medico in medicos:
+        duracion = medico.duracion_consulta_min or 15
+        celdas = []
+        for dia in range(7):
+            ofertas = ofertas_por_medico[medico.id].get(dia, [])
+            bloqueos = bloqueos_por_medico[medico.id].get(dia, [])
+            brutos = minutos_brutos(ofertas)
+            libres = minutos_libres(ofertas, bloqueos)
+            celdas.append({
+                "oferta": brutos // duracion,
+                "bloqueos": (brutos - libres) // duracion,
+            })
+        filas.append({"medico": medico, "celdas": celdas})
+
+    contexto = {
+        "filas": filas,
+        "dias_semana": DIAS_SEMANA,
+        "q": q,
+    }
+    return render(request, "disponibilidad/oferta_por_medico.html", contexto)
 
 
 @login_required

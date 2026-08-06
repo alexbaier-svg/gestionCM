@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block titulo %}Oferta por médico{% endblock %}
+{% block ancho_clase %}contenedor-ancho{% endblock %}
+{% block contenido %}
+<h1>Oferta por médico</h1>
+<p>Cantidad estimada de citas que caben en la oferta de cada médico por día de la semana
+(según su duración de consulta), y cuántas de esas citas quedan cubiertas por un bloqueo.
+Refleja la oferta y los bloqueos <strong>actualmente cargados</strong> (normalmente
+corresponden a un mes); si se reimportan archivos de otro mes, esta vista cambia con ellos.</p>
+
+<form method="get" style="margin-bottom:1rem;">
+  <input type="text" name="q" placeholder="Buscar por nombre..." value="{{ q }}"
+         style="padding:0.5rem 0.7rem; border:1px solid var(--gris-borde); border-radius:8px; width:280px;">
+  <button class="boton secundario" type="submit">Buscar</button>
+</form>
+
+<div class="tarjeta" style="overflow-x:auto;">
+  <table class="tabla-oferta">
+    <thead>
+      <tr>
+        <th class="col-medico">Médico</th>
+        {% for dia in dias_semana %}<th>{{ dia }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for fila in filas %}
+      <tr>
+        <td class="col-medico">{{ fila.medico.nombre_completo }}</td>
+        {% for celda in fila.celdas %}
+          <td class="{% if not celda.oferta %}sin-oferta{% endif %}">
+            {% if celda.oferta %}
+              {{ celda.oferta }}{% if celda.bloqueos %} <span class="bloqueos-cita">({{ celda.bloqueos }} bloq.)</span>{% endif %}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        {% endfor %}
+      </tr>
+      {% empty %}
+      <tr><td colspan="8">No hay médicos activos que coincidan.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

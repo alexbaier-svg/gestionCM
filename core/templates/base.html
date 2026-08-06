@@ -17,6 +17,7 @@
         <a href="{% url 'boxes:distribucion' %}">Distribución</a>
         <a href="{% url 'agenda:diaria' %}">Agenda diaria</a>
         <a href="{% url 'disponibilidad:mapa_calor' %}">Ocupación</a>
+        <a href="{% url 'disponibilidad:oferta_por_medico' %}">Oferta</a>
         {% if es_administrador %}<a href="{% url 'presentacion:visor' %}">Reunión semanal</a>{% endif %}
         {% if perms.auth.view_user %}<a href="{% url 'usuarios_listar' %}">Usuarios</a>{% endif %}
         <span>{{ user.get_full_name|default:user.username }}</span>

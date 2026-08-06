@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
+from disponibilidad.calculos import minutos_libres
 from disponibilidad.models import BloqueoMedico, OfertaMedico
 
 from .forms import ImportarAgendaForm
@@ -63,33 +64,6 @@ def _bloques_del_dia(request, fecha):
     return [b for b in qs if _normalizar_texto(b.especialidad) in ESPECIALIDADES_VALIDAS]
 
 
-def _minutos_libres(ofertas, bloqueos):
-    """Minutos netos disponibles de un médico un día: sus ventanas de oferta,
-    descontando lo que cubren sus bloqueos ese mismo día."""
-    if any(b.tipo == BloqueoMedico.Tipo.DIA_COMPLETO for b in bloqueos):
-        return 0
-
-    total = 0
-    for oferta in ofertas:
-        segmentos = [(oferta.hora_inicio.hour * 60 + oferta.hora_inicio.minute,
-                      oferta.hora_fin.hour * 60 + oferta.hora_fin.minute)]
-        for b in bloqueos:
-            bi = b.hora_inicio.hour * 60 + b.hora_inicio.minute
-            bf = b.hora_fin.hour * 60 + b.hora_fin.minute
-            nuevos = []
-            for si, sf in segmentos:
-                if bf <= si or bi >= sf:
-                    nuevos.append((si, sf))
-                    continue
-                if bi > si:
-                    nuevos.append((si, bi))
-                if bf < sf:
-                    nuevos.append((bf, sf))
-            segmentos = nuevos
-        total += sum(sf - si for si, sf in segmentos)
-    return total
-
-
 def _oferta_del_dia(dia_semana):
     """Ofertas y bloqueos de todos los médicos para un día de semana dado,
     agrupados por medico_id."""
@@ -120,10 +94,10 @@ def _resumen_por_medico(bloques, fecha):
     filas = []
     for (medico_id, box_nombre), info in agrupado.items():
         medico = info["medico"]
-        minutos_libres = _minutos_libres(
+        minutos_disponibles = minutos_libres(
             ofertas_por_medico.get(medico_id, []), bloqueos_por_medico.get(medico_id, [])
         )
-        oferta_citas = minutos_libres // medico.duracion_consulta_min if medico.duracion_consulta_min else 0
+        oferta_citas = minutos_disponibles // medico.duracion_consulta_min if medico.duracion_consulta_min else 0
         no_agendadas = max(oferta_citas - info["cantidad"], 0)
         filas.append({
             "medico": medico.nombre_completo,

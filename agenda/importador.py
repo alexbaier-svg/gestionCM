@@ -7,6 +7,7 @@ las decisiones de diseño (descarte de PHI, matching por RUT, box automático).
 
 import csv
 import io
+import unicodedata
 from datetime import datetime
 
 from django.db import transaction
@@ -24,9 +25,25 @@ ESTADO_MAP = {
     "atendido": BloqueAgenda.Estado.ATENDIDO,
 }
 
+AREA_VALIDA = "consulta presencial"
+
 
 def _norm(texto):
     return (texto or "").strip()
+
+
+def _normalizar_comparable(texto):
+    sin_acentos = unicodedata.normalize("NFKD", texto or "").encode("ascii", "ignore").decode("ascii")
+    return sin_acentos.strip().lower()
+
+
+def _valor_columna(fila, nombre_normalizado):
+    """Busca una columna por nombre normalizado (sin tildes, minúscula), ya que la
+    codificación del CSV puede variar cómo llegan las tildes en los encabezados."""
+    for clave, valor in fila.items():
+        if _normalizar_comparable(clave) == nombre_normalizado:
+            return valor
+    return None
 
 
 def _resolver_box(medico, fecha):
@@ -39,6 +56,12 @@ def _resolver_box(medico, fecha):
 
 
 def _procesar_fila(fila, importacion):
+    area = _normalizar_comparable(_valor_columna(fila, "area"))
+    if area != AREA_VALIDA:
+        # Solo interesan las citas de consulta presencial (no imágenes,
+        # procedimientos, etc.).
+        return False
+
     rut = _norm(fila.get("No. Documento Profesional"))
     nombre_recurso = _norm(fila.get("Profesional/Recurso"))
     appointment_id = _norm(fila.get("AppointmentId")) or None
