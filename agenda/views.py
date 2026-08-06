@@ -13,7 +13,9 @@ from .forms import ImportarAgendaForm
 from .importador import decodificar_bytes, importar_agenda_csv
 from .models import BloqueAgenda, ImportacionAgenda
 
-ESTADOS_VALIDOS = [BloqueAgenda.Estado.CITADO, BloqueAgenda.Estado.CONFIRMADO]
+ESTADOS_VALIDOS = [
+    BloqueAgenda.Estado.CITADO, BloqueAgenda.Estado.CONFIRMADO, BloqueAgenda.Estado.ATENDIDO,
+]
 
 # Especialidades a considerar en la agenda/resumen (definidas por el usuario).
 _ESPECIALIDADES_VALIDAS_RAW = [
