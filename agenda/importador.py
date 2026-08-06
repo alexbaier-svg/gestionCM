@@ -56,10 +56,12 @@ def _resolver_box(medico, fecha):
 
 
 def _procesar_fila(fila, importacion):
-    area = _normalizar_comparable(_valor_columna(fila, "area"))
-    if area != AREA_VALIDA:
+    area_valor = _valor_columna(fila, "area")
+    if area_valor is not None and _normalizar_comparable(area_valor) != AREA_VALIDA:
         # Solo interesan las citas de consulta presencial (no imágenes,
-        # procedimientos, etc.).
+        # procedimientos, etc.). Si la columna 'Área' no se pudo ubicar en el
+        # archivo (variación de formato/codificación), no se filtra por área —
+        # es preferible incluir de más que descartar todas las filas por error.
         return False
 
     rut = _norm(fila.get("No. Documento Profesional"))
