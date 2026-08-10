@@ -1,8 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
-from .data import obtener_diapositivas
+from .models import Reunion
 
 ALTURA_MAX_BARRA_PX = 160
 
@@ -42,12 +42,23 @@ def _aplicar_altura_px_grupos(grupos):
 
 
 @login_required
-def visor(request):
+def listar_reuniones(request):
+    if not _es_administrador(request.user):
+        raise PermissionDenied
+    reuniones = Reunion.objects.all()
+    return render(request, "presentacion/reuniones_lista.html", {"reuniones": reuniones})
+
+
+@login_required
+def visor(request, reunion_id):
     if not _es_administrador(request.user):
         raise PermissionDenied
 
-    diapositivas = obtener_diapositivas()
+    reunion = get_object_or_404(Reunion, pk=reunion_id)
+    diapositivas = list(reunion.diapositivas.all())
     total = len(diapositivas)
+    if total == 0:
+        raise PermissionDenied
 
     try:
         numero = int(request.GET.get("diapositiva", 1))
@@ -56,17 +67,18 @@ def visor(request):
     numero = max(1, min(numero, total))
 
     actual = diapositivas[numero - 1]
-    datos = dict(actual["contexto"])
+    datos = dict(actual.contexto)
     if "categorias" in datos and "series" in datos:
         datos["grafico"] = _armar_grafico(datos["categorias"], datos["series"])
     if "grupos" in datos:
         datos["grupos"] = _aplicar_altura_px_grupos(datos["grupos"])
 
     contexto = {
+        "reunion": reunion,
         "numero": numero,
         "total": total,
-        "titulo": actual["titulo"],
-        "plantilla_diapositiva": actual["plantilla"],
+        "titulo": actual.titulo,
+        "plantilla_diapositiva": actual.plantilla,
         "datos": datos,
         "anterior": numero - 1 if numero > 1 else None,
         "siguiente": numero + 1 if numero < total else None,

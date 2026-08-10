@@ -72,7 +72,7 @@ def dashboard(request):
         accesos.append({
             "titulo": "Reunión semanal",
             "descripcion": "Presentación de indicadores para la reunión semanal.",
-            "url": "presentacion:visor",
+            "url": "presentacion:listar_reuniones",
             "icono": "📊",
         })
     if request.user.has_perm("auth.view_user"):

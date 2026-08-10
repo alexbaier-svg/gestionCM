@@ -4,7 +4,7 @@
 {% block contenido %}
 <div class="presentacion">
   <div class="presentacion-barra">
-    <span>Reunión semanal — diapositiva {{ numero }} de {{ total }}</span>
+    <span><a href="{% url 'presentacion:listar_reuniones' %}">« Reuniones</a> — {{ reunion.titulo|default:reunion.fecha }} — diapositiva {{ numero }} de {{ total }}</span>
     <div class="presentacion-puntos">
       {% for i in indices %}
         <a href="?diapositiva={{ i }}" class="punto{% if i == numero %} activo{% endif %}"></a>
