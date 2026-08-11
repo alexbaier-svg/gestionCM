@@ -1,0 +1,16 @@
+<h2 class="titulo-diapo">Usabilidad Autopago</h2>
+
+<div class="stat-grande-grupo">
+  {% for s in d.stats %}
+  <div class="stat-grande">
+    <div class="stat-grande-etiqueta">{{ s.etiqueta }}</div>
+    <div class="stat-grande-valor">{{ s.valor }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if d.nota %}
+<div class="lista-destacados">
+  <p>{{ d.nota }}</p>
+</div>
+{% endif %}
