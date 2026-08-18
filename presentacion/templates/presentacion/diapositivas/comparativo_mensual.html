@@ -1,4 +1,4 @@
-<h2 class="titulo-diapo">Comparativo Oferta Julio / Agosto</h2>
+<h2 class="titulo-diapo">{{ d.titulo_grafico|default:"Comparativo Oferta Julio / Agosto" }}</h2>
 
 <div class="grafico-barras">
   {% for grupo in d.grafico %}
