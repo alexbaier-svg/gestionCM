@@ -18,7 +18,7 @@
 <div class="tabla-diapo-contenedor" style="margin-top:1.5rem;">
   <table class="tabla-diapo">
     <thead>
-      <tr><th>Semana</th><th>Venta</th><th>Oferta Efectiva</th><th>No Show</th></tr>
+      <tr><th>Semana</th><th>Venta</th><th>Oferta Efectiva</th></tr>
     </thead>
     <tbody>
       {% for fila in d.ventas_semanales %}
@@ -26,7 +26,6 @@
         <td>{{ fila.semana }}</td>
         <td>{{ fila.venta }}</td>
         <td>{{ fila.oferta_efectiva|default:"—" }}</td>
-        <td>{{ fila.no_show|default:"—" }}</td>
       </tr>
       {% endfor %}
     </tbody>
