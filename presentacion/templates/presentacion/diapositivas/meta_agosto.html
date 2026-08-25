@@ -29,6 +29,15 @@
       </tr>
       {% endfor %}
     </tbody>
+    {% if d.venta_total %}
+    <tfoot>
+      <tr class="fila-total">
+        <td>Total al día</td>
+        <td>{{ d.venta_total }}</td>
+        <td></td>
+      </tr>
+    </tfoot>
+    {% endif %}
   </table>
 </div>
 {% endif %}
