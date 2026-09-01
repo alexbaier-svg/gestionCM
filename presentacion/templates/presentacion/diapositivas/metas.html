@@ -1,0 +1,48 @@
+<h2 class="titulo-diapo">{{ d.titulo_grafico|default:"Metas" }}</h2>
+
+{% for seccion in d.secciones %}
+<h3 class="subtitulo-diapo" style="margin-top:1.5rem;">{{ seccion.nombre }}</h3>
+<div class="kpi-grid">
+  {% for kpi in seccion.kpis %}
+  <div class="kpi-card" style="--kpi-color: {{ kpi.color }};">
+    <div class="kpi-etiqueta">{{ kpi.etiqueta }}</div>
+    <div class="kpi-valor">{{ kpi.valor }}</div>
+  </div>
+  {% endfor %}
+  {% if seccion.kpi_destacado %}
+  <div class="kpi-card destacado">
+    <div class="kpi-etiqueta">{{ seccion.kpi_destacado.etiqueta }}</div>
+    <div class="kpi-valor">{{ seccion.kpi_destacado.valor }}</div>
+    <div class="kpi-detalle-claro">{{ seccion.kpi_destacado.detalle }}</div>
+  </div>
+  {% endif %}
+</div>
+
+{% if seccion.ventas_semanales %}
+<div class="tabla-diapo-contenedor" style="margin-top:1rem;">
+  <table class="tabla-diapo">
+    <thead>
+      <tr><th>Semana</th><th>Venta</th><th>Oferta Efectiva</th></tr>
+    </thead>
+    <tbody>
+      {% for fila in seccion.ventas_semanales %}
+      <tr>
+        <td>{{ fila.semana }}</td>
+        <td>{{ fila.venta }}</td>
+        <td>{{ fila.oferta_efectiva|default:"—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    {% if seccion.venta_total %}
+    <tfoot>
+      <tr class="fila-total">
+        <td>Total</td>
+        <td>{{ seccion.venta_total }}</td>
+        <td></td>
+      </tr>
+    </tfoot>
+    {% endif %}
+  </table>
+</div>
+{% endif %}
+{% endfor %}
