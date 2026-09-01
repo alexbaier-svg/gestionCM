@@ -9,6 +9,12 @@
     <div class="stat-grande-etiqueta">Agosto</div>
     <div class="stat-grande-valor">{{ d.agosto_pct }}%</div>
   </div>
+  {% if d.septiembre_valor %}
+  <div class="stat-grande">
+    <div class="stat-grande-etiqueta">Septiembre</div>
+    <div class="stat-grande-valor">{{ d.septiembre_valor }}</div>
+  </div>
+  {% endif %}
 </div>
 
 <div class="lista-destacados">
