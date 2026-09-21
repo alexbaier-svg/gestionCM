@@ -28,6 +28,12 @@ class Medico(models.Model):
         help_text="Usada para estimar cuántas citas caben en su oferta horaria de un día.",
     )
     activo = models.BooleanField(default=True)
+    id_recurso_oferta = models.PositiveIntegerField(
+        "ID de recurso (Oferta/Bloqueos)", null=True, blank=True, unique=True, db_index=True,
+        help_text="IDRecurso del archivo ExportarOferta/ExportarBloqueos. Se completa solo la "
+                   "primera vez que el nombre calza, y desde ahí se usa como clave estable aunque "
+                   "el nombre del archivo cambie (ej. le agreguen un segundo nombre).",
+    )
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

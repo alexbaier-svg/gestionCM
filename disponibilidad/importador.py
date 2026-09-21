@@ -1,11 +1,19 @@
 """Importa los archivos 'ExportarOferta' y 'ExportarBloqueos' del sistema externo.
 
-Ambos archivos no traen RUT del profesional, solo 'NombreRecurso', y con el nombre en
-otro orden que el usado en el mantenedor de médicos (ej. "Pablo Andres Giannini" vs.
-"GIANNINI PABLO ANDRES"). El matching con Medico se hace normalizando ambos nombres
-(sin tildes, en mayúsculas, comparando el conjunto de palabras sin importar el orden).
-Filas cuyo recurso no coincide con ningún médico registrado (equipos, salas, u otros
-profesionales aún no cargados) se omiten.
+Ninguno de los dos archivos trae RUT del profesional, pero sí un 'IDRecurso' numérico
+estable (el identificador interno del recurso en el sistema externo). El matching con
+Medico se hace en este orden:
+  1. Por IDRecurso, si el médico ya tiene uno guardado de una importación anterior
+     (rápido y a prueba de cambios de nombre).
+  2. Por nombre exacto (normalizado: sin tildes, en mayúsculas, comparando el conjunto
+     de palabras sin importar el orden) — ej. "Pablo Andres Giannini" vs.
+     "GIANNINI PABLO ANDRES". Si calza, se guarda su IDRecurso para la próxima vez.
+  3. Por subconjunto de palabras: si el nombre del archivo trae una palabra de más o de
+     menos que el registrado (ej. le agregaron un segundo nombre) pero todas las demás
+     coinciden, y esto resuelve a un único médico sin ambigüedad, también se acepta y se
+     guarda su IDRecurso.
+Filas cuyo recurso no resuelve por ninguna de las tres vías (equipos, salas, u otros
+profesionales aún no cargados, o coincidencias ambiguas) se omiten sin adivinar.
 
 Cada importación reemplaza por completo los datos anteriores: los archivos representan
 el estado vigente de la oferta/bloqueos, no un historial acumulable.
@@ -28,8 +36,49 @@ def _normalizar_nombre(texto):
     return frozenset(t for t in texto.split() if t)
 
 
-def _mapa_medicos_por_nombre():
-    return {_normalizar_nombre(m.nombre_completo): m for m in Medico.objects.all()}
+class _ResolvedorMedicos:
+    """Resuelve el Medico de una fila (IDRecurso, NombreRecurso), con las tres vías
+    descritas en el docstring del módulo. Guarda id_recurso_oferta la primera vez que
+    lo aprende, para que las próximas importaciones no dependan del nombre."""
+
+    def __init__(self):
+        medicos = list(Medico.objects.all())
+        self._por_id = {m.id_recurso_oferta: m for m in medicos if m.id_recurso_oferta is not None}
+        self._por_nombre_exacto = {_normalizar_nombre(m.nombre_completo): m for m in medicos}
+        self._candidatos_subconjunto = [(_normalizar_nombre(m.nombre_completo), m) for m in medicos]
+        self._por_actualizar = {}
+
+    def resolver(self, idrecurso, nombre):
+        if idrecurso in self._por_id:
+            return self._por_id[idrecurso]
+
+        nombre = (nombre or "").strip()
+        if not nombre:
+            return None
+        nombre_norm = _normalizar_nombre(nombre)
+
+        medico = self._por_nombre_exacto.get(nombre_norm)
+        if medico is None:
+            candidatos = [
+                m for palabras, m in self._candidatos_subconjunto
+                if palabras and (palabras <= nombre_norm or nombre_norm <= palabras)
+                and len(palabras & nombre_norm) >= 2
+            ]
+            if len(candidatos) == 1:
+                medico = candidatos[0]
+
+        if medico is not None and idrecurso is not None and medico.id_recurso_oferta != idrecurso:
+            self._por_id[idrecurso] = medico
+            self._por_actualizar[medico.pk] = idrecurso
+        return medico
+
+    def guardar_ids_aprendidos(self):
+        if not self._por_actualizar:
+            return
+        medicos = Medico.objects.in_bulk(self._por_actualizar.keys())
+        for pk, idrecurso in self._por_actualizar.items():
+            medicos[pk].id_recurso_oferta = idrecurso
+        Medico.objects.bulk_update(medicos.values(), ["id_recurso_oferta"])
 
 
 def _parsear_hora(texto):
@@ -69,14 +118,13 @@ def importar_oferta_xlsx(contenido_bytes):
     wb = _cargar_libro(contenido_bytes)
     ws_ofertas = wb["Ofertas"]
     ws_horarios = wb["HorariosOfertas"]
-    medicos_por_nombre = _mapa_medicos_por_nombre()
+    resolvedor = _ResolvedorMedicos()
     ofertas_consulta = _ofertas_de_consulta(wb)
 
     medico_por_oferta = {}
     for fila in ws_ofertas.iter_rows(min_row=2, values_only=True):
-        id_oferta, nombre_recurso = fila[1], fila[3]
-        nombre = (nombre_recurso or "").strip()
-        medico_por_oferta[id_oferta] = medicos_por_nombre.get(_normalizar_nombre(nombre)) if nombre else None
+        id_oferta, idrecurso, nombre_recurso = fila[1], fila[2], fila[3]
+        medico_por_oferta[id_oferta] = resolvedor.resolver(idrecurso, nombre_recurso)
 
     creadas, omitidas = 0, 0
     nuevas = []
@@ -104,6 +152,7 @@ def importar_oferta_xlsx(contenido_bytes):
     with transaction.atomic():
         OfertaMedico.objects.all().delete()
         OfertaMedico.objects.bulk_create(nuevas)
+        resolvedor.guardar_ids_aprendidos()
 
     return creadas, omitidas
 
@@ -112,15 +161,14 @@ def importar_bloqueos_xlsx(contenido_bytes):
     wb = _cargar_libro(contenido_bytes)
     ws_bloqueos = wb["Bloqueos"]
     ws_horarios = wb["HorariosBloqueos"]
-    medicos_por_nombre = _mapa_medicos_por_nombre()
+    resolvedor = _ResolvedorMedicos()
 
     info_por_bloqueo = {}
     for fila in ws_bloqueos.iter_rows(min_row=2, values_only=True):
-        id_bloqueo, nombre_recurso = fila[0], fila[2]
+        id_bloqueo, idrecurso, nombre_recurso = fila[0], fila[1], fila[2]
         tipo, motivo = fila[9], fila[10]
-        nombre = (nombre_recurso or "").strip()
         info_por_bloqueo[id_bloqueo] = {
-            "medico": medicos_por_nombre.get(_normalizar_nombre(nombre)) if nombre else None,
+            "medico": resolvedor.resolver(idrecurso, nombre_recurso),
             "tipo": tipo or BloqueoMedico.Tipo.PARCIAL,
             "motivo": (motivo or "").strip(),
         }
@@ -151,5 +199,6 @@ def importar_bloqueos_xlsx(contenido_bytes):
     with transaction.atomic():
         BloqueoMedico.objects.all().delete()
         BloqueoMedico.objects.bulk_create(nuevos)
+        resolvedor.guardar_ids_aprendidos()
 
     return creados, omitidos
