@@ -40,6 +40,7 @@ def _medicos_del_box_ese_dia(box, dia, por_box):
 
 
 @login_required
+@permission_required("disponibilidad.view_ofertamedico", raise_exception=True)
 def mapa_calor(request):
     try:
         dia = int(request.GET.get("dia"))
@@ -103,6 +104,7 @@ def mapa_calor(request):
 
 
 @login_required
+@permission_required("disponibilidad.view_ofertamedico", raise_exception=True)
 def oferta_por_medico(request):
     q = request.GET.get("q", "").strip()
     medicos = Medico.objects.filter(activo=True)

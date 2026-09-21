@@ -2,7 +2,7 @@ import datetime
 import re
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render
@@ -69,6 +69,7 @@ class BoxDeleteView(PermissionRequiredMixin, DeleteView):
 
 
 @login_required
+@permission_required("boxes.view_box", raise_exception=True)
 def distribucion(request):
     try:
         dia = int(request.GET.get("dia"))

@@ -114,6 +114,7 @@ def _resumen_por_medico(bloques, fecha):
 
 
 @login_required
+@permission_required("agenda.view_bloqueagenda", raise_exception=True)
 def agenda_diaria(request):
     fecha_str = request.GET.get("fecha")
     try:
@@ -137,6 +138,7 @@ def agenda_diaria(request):
 
 
 @login_required
+@permission_required("agenda.view_bloqueagenda", raise_exception=True)
 def agenda_diaria_excel(request):
     import openpyxl
     from openpyxl.utils import get_column_letter

@@ -1,14 +1,10 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, render
 
 from .models import Reunion
 
 ALTURA_MAX_BARRA_PX = 160
-
-
-def _es_administrador(user):
-    return user.is_superuser or user.groups.filter(name="Administrador").exists()
 
 
 def _armar_grafico(categorias, series):
@@ -42,18 +38,15 @@ def _aplicar_altura_px_grupos(grupos):
 
 
 @login_required
+@permission_required("presentacion.view_reunion", raise_exception=True)
 def listar_reuniones(request):
-    if not _es_administrador(request.user):
-        raise PermissionDenied
     reuniones = Reunion.objects.all()
     return render(request, "presentacion/reuniones_lista.html", {"reuniones": reuniones})
 
 
 @login_required
+@permission_required("presentacion.view_reunion", raise_exception=True)
 def visor(request, reunion_id):
-    if not _es_administrador(request.user):
-        raise PermissionDenied
-
     reunion = get_object_or_404(Reunion, pk=reunion_id)
     diapositivas = list(reunion.diapositivas.all())
     total = len(diapositivas)

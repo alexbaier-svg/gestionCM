@@ -33,30 +33,33 @@ def dashboard(request):
             "url": "boxes:listar",
             "icono": "🚪",
         })
-    accesos.append({
-        "titulo": "Distribución",
-        "descripcion": "Ver qué médico tiene cada box, por piso.",
-        "url": "boxes:distribucion",
-        "icono": "🗺️",
-    })
-    accesos.append({
-        "titulo": "Agenda diaria",
-        "descripcion": "Ver y exportar la agenda de un día.",
-        "url": "agenda:diaria",
-        "icono": "📅",
-    })
-    accesos.append({
-        "titulo": "Ocupación de boxes",
-        "descripcion": "Mapa de calor: horas ocupadas según oferta y bloqueos.",
-        "url": "disponibilidad:mapa_calor",
-        "icono": "🔥",
-    })
-    accesos.append({
-        "titulo": "Oferta",
-        "descripcion": "Cuántas citas caben por médico y día de la semana.",
-        "url": "disponibilidad:oferta_por_medico",
-        "icono": "📈",
-    })
+    if request.user.has_perm("boxes.view_box"):
+        accesos.append({
+            "titulo": "Distribución",
+            "descripcion": "Ver qué médico tiene cada box, por piso.",
+            "url": "boxes:distribucion",
+            "icono": "🗺️",
+        })
+    if request.user.has_perm("agenda.view_bloqueagenda"):
+        accesos.append({
+            "titulo": "Agenda diaria",
+            "descripcion": "Ver y exportar la agenda de un día.",
+            "url": "agenda:diaria",
+            "icono": "📅",
+        })
+    if request.user.has_perm("disponibilidad.view_ofertamedico"):
+        accesos.append({
+            "titulo": "Ocupación de boxes",
+            "descripcion": "Mapa de calor: horas ocupadas según oferta y bloqueos.",
+            "url": "disponibilidad:mapa_calor",
+            "icono": "🔥",
+        })
+        accesos.append({
+            "titulo": "Oferta",
+            "descripcion": "Cuántas citas caben por médico y día de la semana.",
+            "url": "disponibilidad:oferta_por_medico",
+            "icono": "📈",
+        })
     if (
         request.user.has_perm("agenda.add_bloqueagenda")
         or request.user.has_perm("disponibilidad.add_ofertamedico")
@@ -68,7 +71,7 @@ def dashboard(request):
             "url": "importaciones",
             "icono": "⬆️",
         })
-    if request.user.is_superuser or request.user.groups.filter(name="Administrador").exists():
+    if request.user.has_perm("presentacion.view_reunion"):
         accesos.append({
             "titulo": "Reunión semanal",
             "descripcion": "Presentación de indicadores para la reunión semanal.",
