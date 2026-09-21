@@ -44,14 +44,14 @@
   <h3>Ingresos Septiembre:</h3>
   <ul>
     {% for item in d.ingresos_septiembre %}
-      <li>{{ item.nombre }}{% if item.especialidad %} — {{ item.especialidad }}{% endif %} ({{ item.consultas }} consultas mensuales)</li>
+      <li>{{ item.nombre }}{% if item.especialidad %} — {{ item.especialidad }}{% endif %}{% if item.consultas %} ({{ item.consultas }} consultas mensuales){% endif %}</li>
     {% endfor %}
   </ul>
   {% if d.ingresos_septiembre_en_proceso %}
   <p style="font-weight:600; margin-bottom:0.3rem;">En proceso:</p>
   <ul>
     {% for item in d.ingresos_septiembre_en_proceso %}
-      <li>{{ item.nombre }}{% if item.especialidad %} — {{ item.especialidad }}{% endif %} ({{ item.consultas }} consultas mensuales)</li>
+      <li>{{ item.nombre }}{% if item.especialidad %} — {{ item.especialidad }}{% endif %}{% if item.consultas %} ({{ item.consultas }} consultas mensuales){% endif %}</li>
     {% endfor %}
   </ul>
   {% endif %}
