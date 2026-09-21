@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 from medicos.models import Medico
 
-ROLES = ["Administrador", "Recepción", "Médico"]
+ROLES = ["Administrador", "Recepción", "Médico", "Reuniones"]
 
 
 class UsuarioForm(forms.ModelForm):
