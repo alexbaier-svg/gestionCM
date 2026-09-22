@@ -86,6 +86,11 @@ def _parsear_hora(texto):
     return datetime.time(int(horas), int(minutos))
 
 
+def _parsear_fecha_validez(texto):
+    """'Validodesde'/'Validohasta' vienen como '9/21/2026 12:00:00 AM -03:00'."""
+    return datetime.datetime.strptime(texto.split(" ")[0], "%m/%d/%Y").date()
+
+
 def _cargar_libro(contenido_bytes):
     return openpyxl.load_workbook(io.BytesIO(contenido_bytes), data_only=True)
 
@@ -114,7 +119,13 @@ def _ofertas_de_consulta(wb):
     return con_servicio
 
 
-def importar_oferta_xlsx(contenido_bytes):
+def importar_oferta_xlsx(contenido_bytes, fecha_referencia=None):
+    """fecha_referencia: solo se importan bloques cuyo rango Validodesde/Validohasta
+    cubra esta fecha (el archivo trae, para un mismo médico, varias 'ofertas' con
+    rangos de vigencia distintos — ej. una plantilla de horario vigente esta semana y
+    otra ya programada para octubre — y sumarlas todas duplica su disponibilidad).
+    Por defecto, hoy."""
+    fecha_referencia = fecha_referencia or datetime.date.today()
     wb = _cargar_libro(contenido_bytes)
     ws_ofertas = wb["Ofertas"]
     ws_horarios = wb["HorariosOfertas"]
@@ -124,7 +135,12 @@ def importar_oferta_xlsx(contenido_bytes):
     medico_por_oferta = {}
     for fila in ws_ofertas.iter_rows(min_row=2, values_only=True):
         id_oferta, idrecurso, nombre_recurso = fila[1], fila[2], fila[3]
-        medico_por_oferta[id_oferta] = resolvedor.resolver(idrecurso, nombre_recurso)
+        desde, hasta = fila[6], fila[7]
+        vigente = (
+            desde and hasta
+            and _parsear_fecha_validez(desde) <= fecha_referencia <= _parsear_fecha_validez(hasta)
+        )
+        medico_por_oferta[id_oferta] = resolvedor.resolver(idrecurso, nombre_recurso) if vigente else None
 
     creadas, omitidas = 0, 0
     nuevas = []
@@ -157,7 +173,9 @@ def importar_oferta_xlsx(contenido_bytes):
     return creadas, omitidas
 
 
-def importar_bloqueos_xlsx(contenido_bytes):
+def importar_bloqueos_xlsx(contenido_bytes, fecha_referencia=None):
+    """Ver docstring de importar_oferta_xlsx: mismo filtro de vigencia por fecha."""
+    fecha_referencia = fecha_referencia or datetime.date.today()
     wb = _cargar_libro(contenido_bytes)
     ws_bloqueos = wb["Bloqueos"]
     ws_horarios = wb["HorariosBloqueos"]
@@ -166,9 +184,14 @@ def importar_bloqueos_xlsx(contenido_bytes):
     info_por_bloqueo = {}
     for fila in ws_bloqueos.iter_rows(min_row=2, values_only=True):
         id_bloqueo, idrecurso, nombre_recurso = fila[0], fila[1], fila[2]
+        desde, hasta = fila[5], fila[6]
         tipo, motivo = fila[9], fila[10]
+        vigente = (
+            desde and hasta
+            and _parsear_fecha_validez(desde) <= fecha_referencia <= _parsear_fecha_validez(hasta)
+        )
         info_por_bloqueo[id_bloqueo] = {
-            "medico": resolvedor.resolver(idrecurso, nombre_recurso),
+            "medico": resolvedor.resolver(idrecurso, nombre_recurso) if vigente else None,
             "tipo": tipo or BloqueoMedico.Tipo.PARCIAL,
             "motivo": (motivo or "").strip(),
         }
