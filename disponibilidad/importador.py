@@ -91,6 +91,36 @@ def _parsear_fecha_validez(texto):
     return datetime.datetime.strptime(texto.split(" ")[0], "%m/%d/%Y").date()
 
 
+def _parsear_datetime_validez(texto):
+    """Ej. '10/5/2026 6:30:00 PM -03:00' -> datetime (se ignora el huso horario, ya
+    viene en hora local de Chile)."""
+    sin_huso = " ".join(texto.split(" ")[:3])
+    return datetime.datetime.strptime(sin_huso, "%m/%d/%Y %I:%M:%S %p")
+
+
+_FIN_DE_DIA = datetime.time(23, 59)
+
+
+def _bloqueos_por_dia_desde_rango(desde_dt, hasta_dt, fecha_inicio, fecha_fin):
+    """Para los tipos 'Range'/'WholeDay', el bloqueo no viene desglosado por día en
+    HorariosBloqueos: el propio rango Validodesde/Validohasta (con hora incluida) ES
+    el período bloqueado, que puede cruzar varios días. Devuelve, para cada día dentro
+    de [fecha_inicio, fecha_fin] que se traslapa con el rango, su (dia_semana,
+    hora_inicio, hora_fin)."""
+    resultado = []
+    dia = max(desde_dt.date(), fecha_inicio)
+    ultimo = min(hasta_dt.date(), fecha_fin)
+    while dia <= ultimo:
+        inicio_dia = datetime.datetime.combine(dia, datetime.time.min)
+        fin_dia = datetime.datetime.combine(dia, _FIN_DE_DIA)
+        inicio = max(desde_dt, inicio_dia)
+        fin = min(hasta_dt, fin_dia)
+        if inicio < fin:
+            resultado.append((dia.weekday(), inicio.time(), fin.time()))
+        dia += datetime.timedelta(days=1)
+    return resultado
+
+
 def _cargar_libro(contenido_bytes):
     return openpyxl.load_workbook(io.BytesIO(contenido_bytes), data_only=True)
 
@@ -188,7 +218,10 @@ def importar_bloqueos_xlsx(contenido_bytes, fecha_referencia=None, fecha_hasta_r
     ws_horarios = wb["HorariosBloqueos"]
     resolvedor = _ResolvedorMedicos()
 
+    ids_con_horario = {fila[0] for fila in ws_horarios.iter_rows(min_row=2, min_col=1, max_col=1, values_only=True)}
+
     info_por_bloqueo = {}
+    sin_horario = []
     for fila in ws_bloqueos.iter_rows(min_row=2, values_only=True):
         id_bloqueo, idrecurso, nombre_recurso = fila[0], fila[1], fila[2]
         desde, hasta = fila[5], fila[6]
@@ -203,6 +236,10 @@ def importar_bloqueos_xlsx(contenido_bytes, fecha_referencia=None, fecha_hasta_r
             "tipo": tipo or BloqueoMedico.Tipo.PARCIAL,
             "motivo": (motivo or "").strip(),
         }
+        # Range/WholeDay no traen fila en HorariosBloqueos: el propio rango
+        # Validodesde/Validohasta (con hora) es el período bloqueado.
+        if vigente and id_bloqueo not in ids_con_horario and desde and hasta:
+            sin_horario.append((id_bloqueo, _parsear_datetime_validez(desde), _parsear_datetime_validez(hasta)))
 
     creados, omitidos = 0, 0
     nuevos = []
@@ -226,6 +263,27 @@ def importar_bloqueos_xlsx(contenido_bytes, fecha_referencia=None, fecha_hasta_r
                     motivo=info["motivo"],
                 ))
                 creados += 1
+
+    for id_bloqueo, desde_dt, hasta_dt in sin_horario:
+        info = info_por_bloqueo[id_bloqueo]
+        medico = info["medico"]
+        if medico is None:
+            omitidos += 1
+            continue
+        dias = _bloqueos_por_dia_desde_rango(desde_dt, hasta_dt, fecha_referencia, fecha_hasta_referencia)
+        if not dias:
+            omitidos += 1
+            continue
+        for dia_semana, hora_inicio, hora_fin in dias:
+            nuevos.append(BloqueoMedico(
+                medico=medico,
+                dia_semana=dia_semana,
+                hora_inicio=hora_inicio,
+                hora_fin=hora_fin,
+                tipo=info["tipo"],
+                motivo=info["motivo"],
+            ))
+            creados += 1
 
     with transaction.atomic():
         BloqueoMedico.objects.all().delete()

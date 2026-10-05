@@ -29,6 +29,7 @@ class BloqueoMedico(models.Model):
     class Tipo(models.TextChoices):
         PARCIAL = "Partial", "Parcial"
         DIA_COMPLETO = "WholeDay", "Día completo"
+        RANGO = "Range", "Rango de fecha/hora"
 
     medico = models.ForeignKey(
         "medicos.Medico", on_delete=models.CASCADE, related_name="bloqueos"
