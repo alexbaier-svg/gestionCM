@@ -187,7 +187,12 @@ def importar_bloqueos(request):
     if request.method == "POST":
         form = ImportarBloqueosForm(request.POST, request.FILES)
         if form.is_valid():
-            creados, omitidos = importar_bloqueos_xlsx(request.FILES["archivo"].read())
+            hoy = datetime.date.today()
+            creados, omitidos = importar_bloqueos_xlsx(
+                request.FILES["archivo"].read(),
+                fecha_referencia=hoy,
+                fecha_hasta_referencia=hoy + datetime.timedelta(days=6),
+            )
             messages.success(
                 request,
                 f"Bloqueos importados: {creados} franjas cargadas, {omitidos} filas omitidas "

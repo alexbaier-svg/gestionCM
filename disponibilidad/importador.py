@@ -173,9 +173,16 @@ def importar_oferta_xlsx(contenido_bytes, fecha_referencia=None):
     return creadas, omitidas
 
 
-def importar_bloqueos_xlsx(contenido_bytes, fecha_referencia=None):
-    """Ver docstring de importar_oferta_xlsx: mismo filtro de vigencia por fecha."""
+def importar_bloqueos_xlsx(contenido_bytes, fecha_referencia=None, fecha_hasta_referencia=None):
+    """A diferencia de Ofertas (donde el rango de vigencia identifica una 'generación'
+    de plantilla recurrente que cubre semanas completas), en Bloqueos cada fila tiene un
+    rango de vigencia acotado al evento puntual que bloquea (ej. una licencia de un solo
+    día). Por eso aquí el filtro es por traslape con el período [fecha_referencia,
+    fecha_hasta_referencia] completo (toda la semana a importar), no por si una única
+    fecha cae dentro del rango — de lo contrario se pierden bloqueos válidos en días de
+    la semana distintos al de la importación."""
     fecha_referencia = fecha_referencia or datetime.date.today()
+    fecha_hasta_referencia = fecha_hasta_referencia or fecha_referencia
     wb = _cargar_libro(contenido_bytes)
     ws_bloqueos = wb["Bloqueos"]
     ws_horarios = wb["HorariosBloqueos"]
@@ -188,7 +195,8 @@ def importar_bloqueos_xlsx(contenido_bytes, fecha_referencia=None):
         tipo, motivo = fila[9], fila[10]
         vigente = (
             desde and hasta
-            and _parsear_fecha_validez(desde) <= fecha_referencia <= _parsear_fecha_validez(hasta)
+            and _parsear_fecha_validez(desde) <= fecha_hasta_referencia
+            and _parsear_fecha_validez(hasta) >= fecha_referencia
         )
         info_por_bloqueo[id_bloqueo] = {
             "medico": resolvedor.resolver(idrecurso, nombre_recurso) if vigente else None,
