@@ -29,7 +29,9 @@ de tocar nada de `presentacion/` o `disponibilidad/`.
    DATABASE_URL="<DATABASE_PUBLIC_URL>" DJANGO_SETTINGS_MODULE=config.settings \
      python manage.py shell -c "..."
    ```
-5. Local (SQLite) funciona sin nada de esto: `python manage.py runserver`.
+5. Local (SQLite) sirve solo para **desarrollo de código** (importador, plantillas,
+   modelos): `python manage.py migrate` + `python manage.py runserver`. No contiene
+   reuniones ni datos reales, y no es necesario copiarlos desde producción (ver sección 2).
 
 **Nunca** commitear `DATABASE_URL`, contraseñas de Postgres, ni `SECRET_KEY` al repo —
 están en `.gitignore` (`.env*`) a propósito. Si alguna vez quedan en un script de
@@ -44,23 +46,33 @@ App `presentacion/`. Modelos:
   `presentacion/templates/presentacion/diapositivas/` y le pasa datos vía `contexto`.
 
 No hay UI de edición: las reuniones se construyen/corrigen con scripts Python corridos
-vía `manage.py shell -c "exec(open(ruta, encoding='utf-8').read())"` (ver patrón más
-abajo), tanto contra SQLite local como contra Postgres de producción, y **deben quedar
-iguales en ambas**.
+vía `manage.py shell -c "..."` (ver patrón más abajo) **directamente contra el Postgres
+de producción**, que es la **única fuente de verdad** de las reuniones. No se mantiene
+una copia local de reuniones ni de datos reales (decisión del 06/10/2026): evita tener
+dos bases que se desalineen y no trae a disco/OneDrive datos de contacto del personal
+médico.
+
+Relaciones útiles: `Reunion.diapositivas` (related_name; no `diapositiva_set`).
 
 ## 2. Patrón de trabajo para construir/corregir una reunión
 
-1. Escribir un script Python autocontenido en el scratchpad de la sesión (no en el
-   repo) que haga el cálculo o cree/actualice `Reunion`/`Diapositiva`.
-2. Correrlo contra local:
+1. **Leer primero** el estado actual en producción (solo lectura): `Reunion` por fecha y
+   el `contexto` de la diapositiva a tocar.
+2. Escribir un script Python autocontenido en el scratchpad de la sesión (no en el
+   repo) que haga el cálculo o cree/actualice `Reunion`/`Diapositiva`. Modificar solo
+   las claves necesarias del `contexto`, sin reemplazarlo completo.
+3. Correrlo contra producción (con `DATABASE_URL` apuntando a `DATABASE_PUBLIC_URL`,
+   solo en memoria de la terminal) y verificar el `contexto` guardado:
    ```
-   python manage.py shell -c "exec(open(r'RUTA_SCRATCHPAD\script.py', encoding='utf-8').read())"
+   DATABASE_URL="<DATABASE_PUBLIC_URL>" DJANGO_SETTINGS_MODULE=config.settings \
+     python manage.py shell -c "exec(open(r'RUTA_SCRATCHPAD\script.py', encoding='utf-8').read())"
    ```
-3. Correr el **mismo** script contra producción (con `DATABASE_URL` apuntando a
-   `DATABASE_PUBLIC_URL`).
-4. Si los números no coinciden entre local y producción, **producción manda** (es la
-   que realmente usa el usuario para importar archivos vía el sitio) — copiar su
-   `contexto` calculado a local en vez de recalcular dos veces con datos distintos.
+4. Local solo se usa para probar **cambios de código** (plantillas, importador). Si la
+   plantilla cambia, hay commit + push a `master` para que Railway la despliegue.
+
+Notas: `railway link` queda asociado a la carpeta; si en una terminal aparece "No linked
+project found", repetir `railway link` (proyecto `responsible-renewal`, entorno
+`production`, servicio `web`).
 
 ## 3. Estructura estándar de una reunión semanal
 
