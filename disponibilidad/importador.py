@@ -156,6 +156,14 @@ def importar_oferta_xlsx(contenido_bytes, fecha_referencia=None):
     otra ya programada para octubre — y sumarlas todas duplica su disponibilidad).
     Por defecto, hoy."""
     fecha_referencia = fecha_referencia or datetime.date.today()
+    # La vigencia se evalúa día por día de la semana de fecha_referencia (domingo
+    # cuenta como la semana siguiente): una franja del martes vale si la oferta rige
+    # ese martes, aunque no rija el lunes. Así un médico que empieza a mitad de
+    # semana (o atiende un solo día) no se pierde, y plantillas de otras semanas
+    # no se suman.
+    inicio_semana = fecha_referencia - datetime.timedelta(days=fecha_referencia.weekday())
+    if fecha_referencia.weekday() == 6:
+        inicio_semana = fecha_referencia + datetime.timedelta(days=1)
     wb = _cargar_libro(contenido_bytes)
     ws_ofertas = wb["Ofertas"]
     ws_horarios = wb["HorariosOfertas"]
@@ -163,13 +171,15 @@ def importar_oferta_xlsx(contenido_bytes, fecha_referencia=None):
     ofertas_consulta = _ofertas_de_consulta(wb)
 
     medico_por_oferta = {}
+    rango_por_oferta = {}
     for fila in ws_ofertas.iter_rows(min_row=2, values_only=True):
         id_oferta, idrecurso, nombre_recurso = fila[1], fila[2], fila[3]
         desde, hasta = fila[6], fila[7]
-        vigente = (
-            desde and hasta
-            and _parsear_fecha_validez(desde) <= fecha_referencia <= _parsear_fecha_validez(hasta)
-        )
+        vigente = False
+        if desde and hasta:
+            d, h = _parsear_fecha_validez(desde), _parsear_fecha_validez(hasta)
+            rango_por_oferta[id_oferta] = (d, h)
+            vigente = d <= inicio_semana + datetime.timedelta(days=6) and h >= inicio_semana
         medico_por_oferta[id_oferta] = resolvedor.resolver(idrecurso, nombre_recurso) if vigente else None
 
     creadas, omitidas = 0, 0
@@ -185,8 +195,9 @@ def importar_oferta_xlsx(contenido_bytes, fecha_referencia=None):
         if medico is None or not hora_desde or not hora_hasta or not es_consulta:
             omitidas += 1
             continue
+        desde_vig, hasta_vig = rango_por_oferta[id_oferta]
         for indice_dia, marca in enumerate(marcas_dias):
-            if marca:
+            if marca and desde_vig <= inicio_semana + datetime.timedelta(days=indice_dia) <= hasta_vig:
                 nuevas.append(OfertaMedico(
                     medico=medico,
                     dia_semana=indice_dia,
