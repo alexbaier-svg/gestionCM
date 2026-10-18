@@ -86,17 +86,19 @@ diapositivas es:
 4. Meta del mes en curso (`meta_agosto.html` — el nombre de archivo quedó así pero se
    usa para cualquier mes) — tabla de ventas semanales + meta + consultas diarias
    necesarias.
-5. Comparativo Venta año contra año (`meta_venta.html`) — venta acumulada a la fecha,
-   año actual vs. año anterior.
-6. Experiencia Paciente (`experiencia_paciente.html`) — Total/ACHS/No Ley, acumulado
+5. Experiencia Paciente (`experiencia_paciente.html`) — Total/ACHS/No Ley, acumulado
    mes.
-7. Usabilidad Autopago (`usabilidad_autopago_semanal.html`) — **serie histórica
+6. Usabilidad Autopago (`usabilidad_autopago_semanal.html`) — **serie histórica
    semanal + promedio** (nunca reemplazar por un solo dato: siempre agregar la semana
    nueva a la lista `stats` existente y recalcular el promedio).
 
+El **Comparativo Venta año contra año** (`meta_venta.html`) NO va en las reuniones
+semanales: solo en las de cierre de mes (decisión del usuario, 18/10/2026).
+
 ### Cierre de mes
 
-Mismo esquema pero: Oferta por Especialidad es del **mes completo** (proyección al
+Mismo esquema, más el Comparativo Venta año contra año (venta del mes vs. mismo mes del
+año anterior), pero: Oferta por Especialidad es del **mes completo** (proyección al
 cierre, no solo la semana), se agrega Comparativo Oferta/Bloqueos mes vs. mes anterior,
 y la sección de Metas pasa a mostrar venta **real final** del mes (no parcial).
 
