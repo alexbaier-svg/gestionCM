@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import BloqueoMedico, OfertaMedico
+from .models import BloqueoMedico, OfertaDiaria, OfertaMedico
 
 
 @admin.register(OfertaMedico)
@@ -15,3 +15,10 @@ class BloqueoMedicoAdmin(admin.ModelAdmin):
     list_display = ["medico", "dia_semana", "hora_inicio", "hora_fin", "tipo", "motivo"]
     list_filter = ["dia_semana", "tipo"]
     search_fields = ["medico__nombre_completo", "motivo"]
+
+
+@admin.register(OfertaDiaria)
+class OfertaDiariaAdmin(admin.ModelAdmin):
+    list_display = ["medico", "fecha", "oferta", "bloqueos"]
+    list_filter = ["fecha"]
+    search_fields = ["medico__nombre_completo"]

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block titulo %}Oferta médicos{% endblock %}
+{% block ancho_clase %}contenedor-ancho{% endblock %}
+{% block contenido %}
+<h1>Oferta médicos</h1>
+<p>Cantidad de citas que caben en la oferta de cada médico durante el mes elegido (según su
+duración de consulta), y cuántas de esas citas quedan cubiertas por un bloqueo. El mes se va
+armando con cada importación de oferta y bloqueos, semana a semana.</p>
+
+{% if meses %}
+<form method="get" style="margin-bottom:1rem; display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
+  <select name="mes" onchange="this.form.submit()"
+          style="padding:0.5rem 0.7rem; border:1px solid var(--gris-borde); border-radius:8px;">
+    {% for m in meses %}
+      <option value="{{ m.valor }}"{% if m.valor == mes_elegido %} selected{% endif %}>{{ m.texto }}</option>
+    {% endfor %}
+  </select>
+  <input type="text" name="q" placeholder="Buscar por nombre..." value="{{ q }}"
+         style="padding:0.5rem 0.7rem; border:1px solid var(--gris-borde); border-radius:8px; width:260px;">
+  <button class="boton secundario" type="submit">Buscar</button>
+</form>
+<p>Días con oferta cargada en este mes: <strong>{{ dias_cargados }}</strong>.
+Si el mes aún no termina de importarse, los números son parciales.</p>
+
+<div class="tarjeta" style="overflow-x:auto;">
+  <table class="tabla-oferta">
+    <thead>
+      <tr><th class="col-medico">Médico</th><th>Especialidad</th><th>Oferta</th><th>Bloqueos</th><th>Efectiva</th></tr>
+    </thead>
+    <tbody>
+      {% for fila in filas %}
+      <tr>
+        <td class="col-medico">{{ fila.medico.nombre_completo }}</td>
+        <td>{{ fila.especialidad|default:"—" }}</td>
+        {% if fila.oferta %}
+          <td>{{ fila.oferta }}</td>
+          <td>{{ fila.bloqueos }}</td>
+          <td>{{ fila.efectiva }}</td>
+        {% else %}
+          <td class="sin-oferta">—</td><td class="sin-oferta">—</td><td class="sin-oferta">—</td>
+        {% endif %}
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">No hay médicos activos que coincidan.</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td class="col-medico"><strong>Total</strong></td><td></td>
+        <td><strong>{{ totales.oferta }}</strong></td>
+        <td><strong>{{ totales.bloqueos }}</strong></td>
+        <td><strong>{{ totales.efectiva }}</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+{% else %}
+<div class="tarjeta"><p>Aún no hay historial. Se genera a partir de la próxima importación de oferta y bloqueos.</p></div>
+{% endif %}
+{% endblock %}

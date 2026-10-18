@@ -12,7 +12,7 @@ from medicos.models import Medico
 from .calculos import minutos_brutos, minutos_libres
 from .forms import ImportarBloqueosForm, ImportarOfertaForm
 from .importador import importar_bloqueos_xlsx, importar_oferta_xlsx
-from .models import BloqueoMedico, OfertaMedico
+from .models import BloqueoMedico, OfertaDiaria, OfertaMedico
 
 DIAS_SEMANA = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
 HORA_INICIO_CENTRO = datetime.time(8, 0)
@@ -141,6 +141,63 @@ def oferta_por_medico(request):
         "q": q,
     }
     return render(request, "disponibilidad/oferta_por_medico.html", contexto)
+
+
+MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+         "septiembre", "octubre", "noviembre", "diciembre"]
+
+
+@login_required
+@permission_required("disponibilidad.view_ofertamedico", raise_exception=True)
+def oferta_mensual(request):
+    meses = sorted(
+        {(f.year, f.month) for f in OfertaDiaria.objects.dates("fecha", "month")}, reverse=True
+    )
+    hoy = datetime.date.today()
+    elegido = (hoy.year, hoy.month)
+    try:
+        anio, mes = (int(x) for x in request.GET.get("mes", "").split("-"))
+        if (anio, mes) in meses:
+            elegido = (anio, mes)
+    except ValueError:
+        pass
+    if elegido not in meses and meses:
+        elegido = meses[0]
+
+    q = request.GET.get("q", "").strip()
+    filas, totales, dias_cargados = [], {"oferta": 0, "bloqueos": 0, "efectiva": 0}, 0
+    if meses:
+        diarias = OfertaDiaria.objects.filter(fecha__year=elegido[0], fecha__month=elegido[1])
+        dias_cargados = diarias.values("fecha").distinct().count()
+        por_medico = defaultdict(lambda: [0, 0])
+        for medico_id, oferta, bloqueos in diarias.values_list("medico_id", "oferta", "bloqueos"):
+            por_medico[medico_id][0] += oferta
+            por_medico[medico_id][1] += bloqueos
+        medicos = Medico.objects.filter(activo=True).prefetch_related("especialidades")
+        if q:
+            medicos = medicos.filter(nombre_completo__icontains=q)
+        for medico in medicos.order_by("nombre_completo"):
+            oferta, bloqueos = por_medico.get(medico.id, [0, 0])
+            totales["oferta"] += oferta
+            totales["bloqueos"] += bloqueos
+            totales["efectiva"] += oferta - bloqueos
+            filas.append({
+                "medico": medico,
+                "especialidad": ", ".join(e.nombre for e in medico.especialidades.all()),
+                "oferta": oferta,
+                "bloqueos": bloqueos,
+                "efectiva": oferta - bloqueos,
+            })
+
+    contexto = {
+        "meses": [{"valor": f"{a}-{m:02d}", "texto": f"{MESES[m - 1].capitalize()} {a}"} for a, m in meses],
+        "mes_elegido": f"{elegido[0]}-{elegido[1]:02d}",
+        "filas": filas,
+        "totales": totales,
+        "dias_cargados": dias_cargados,
+        "q": q,
+    }
+    return render(request, "disponibilidad/oferta_mensual.html", contexto)
 
 
 @login_required

@@ -28,6 +28,7 @@ from django.db import transaction
 
 from medicos.models import Medico
 
+from .calculos import guardar_historial_semana, inicio_semana
 from .models import BloqueoMedico, OfertaMedico
 
 
@@ -149,7 +150,7 @@ def _ofertas_de_consulta(wb):
     return con_servicio
 
 
-def importar_oferta_xlsx(contenido_bytes, fecha_referencia=None):
+def importar_oferta_xlsx(contenido_bytes, fecha_referencia=None, solo_calcular=False):
     """fecha_referencia: solo se importan bloques cuyo rango Validodesde/Validohasta
     cubra esta fecha (el archivo trae, para un mismo médico, varias 'ofertas' con
     rangos de vigencia distintos — ej. una plantilla de horario vigente esta semana y
@@ -206,15 +207,19 @@ def importar_oferta_xlsx(contenido_bytes, fecha_referencia=None):
                 ))
                 creadas += 1
 
+    if solo_calcular:
+        return nuevas
+
     with transaction.atomic():
         OfertaMedico.objects.all().delete()
         OfertaMedico.objects.bulk_create(nuevas)
         resolvedor.guardar_ids_aprendidos()
+    guardar_historial_semana(inicio_semana(fecha_referencia), ofertas=nuevas)
 
     return creadas, omitidas
 
 
-def importar_bloqueos_xlsx(contenido_bytes, fecha_referencia=None, fecha_hasta_referencia=None):
+def importar_bloqueos_xlsx(contenido_bytes, fecha_referencia=None, fecha_hasta_referencia=None, solo_calcular=False):
     """A diferencia de Ofertas (donde el rango de vigencia identifica una 'generación'
     de plantilla recurrente que cubre semanas completas), en Bloqueos cada fila tiene un
     rango de vigencia acotado al evento puntual que bloquea (ej. una licencia de un solo
@@ -296,9 +301,13 @@ def importar_bloqueos_xlsx(contenido_bytes, fecha_referencia=None, fecha_hasta_r
             ))
             creados += 1
 
+    if solo_calcular:
+        return nuevos
+
     with transaction.atomic():
         BloqueoMedico.objects.all().delete()
         BloqueoMedico.objects.bulk_create(nuevos)
         resolvedor.guardar_ids_aprendidos()
+    guardar_historial_semana(inicio_semana(fecha_referencia))
 
     return creados, omitidos

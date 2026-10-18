@@ -60,6 +60,12 @@ def dashboard(request):
             "url": "disponibilidad:oferta_por_medico",
             "icono": "📈",
         })
+        accesos.append({
+            "titulo": "Oferta médicos",
+            "descripcion": "Oferta de cada médico en un mes, con selector de mes.",
+            "url": "disponibilidad:oferta_mensual",
+            "icono": "🗓️",
+        })
     if (
         request.user.has_perm("agenda.add_bloqueagenda")
         or request.user.has_perm("disponibilidad.add_ofertamedico")
