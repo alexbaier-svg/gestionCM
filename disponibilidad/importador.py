@@ -28,7 +28,7 @@ from django.db import transaction
 
 from medicos.models import Medico
 
-from .calculos import guardar_historial_semana, inicio_semana
+from .calculos import guardar_historial_semana, inicio_semana as lunes_de_semana
 from .models import BloqueoMedico, OfertaMedico
 
 
@@ -214,7 +214,7 @@ def importar_oferta_xlsx(contenido_bytes, fecha_referencia=None, solo_calcular=F
         OfertaMedico.objects.all().delete()
         OfertaMedico.objects.bulk_create(nuevas)
         resolvedor.guardar_ids_aprendidos()
-    guardar_historial_semana(inicio_semana(fecha_referencia), ofertas=nuevas)
+    guardar_historial_semana(lunes_de_semana(fecha_referencia), ofertas=nuevas)
 
     return creadas, omitidas
 
@@ -308,6 +308,6 @@ def importar_bloqueos_xlsx(contenido_bytes, fecha_referencia=None, fecha_hasta_r
         BloqueoMedico.objects.all().delete()
         BloqueoMedico.objects.bulk_create(nuevos)
         resolvedor.guardar_ids_aprendidos()
-    guardar_historial_semana(inicio_semana(fecha_referencia))
+    guardar_historial_semana(lunes_de_semana(fecha_referencia))
 
     return creados, omitidos
