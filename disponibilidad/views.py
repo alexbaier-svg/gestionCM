@@ -173,6 +173,22 @@ def oferta_mensual(request):
         for medico_id, oferta, bloqueos in diarias.values_list("medico_id", "oferta", "bloqueos"):
             por_medico[medico_id][0] += oferta
             por_medico[medico_id][1] += bloqueos
+        anterior = (elegido[0] - 1, 12) if elegido[1] == 1 else (elegido[0], elegido[1] - 1)
+        tiene_anterior = anterior in meses
+        previo = defaultdict(int)
+        if tiene_anterior:
+            previas = OfertaDiaria.objects.filter(fecha__year=anterior[0], fecha__month=anterior[1])
+            dias_previos = previas.values("fecha").distinct().count()
+            for medico_id, oferta in previas.values_list("medico_id", "oferta"):
+                previo[medico_id] += oferta
+
+            # Quién aparece / deja de aparecer, sobre todos los médicos (sin el filtro de búsqueda).
+            nuevos_ids = [m for m, v in por_medico.items() if v[0] > 0 and previo.get(m, 0) == 0]
+            salen_ids = [m for m, v in previo.items() if v > 0 and por_medico.get(m, [0, 0])[0] == 0]
+            nombres = dict(Medico.objects.filter(id__in=nuevos_ids + salen_ids).values_list("id", "nombre_completo"))
+            aparecen = sorted(nombres[m] for m in nuevos_ids)
+            dejan = sorted(nombres[m] for m in salen_ids)
+
         medicos = Medico.objects.filter(activo=True).prefetch_related("especialidades")
         if q:
             medicos = medicos.filter(nombre_completo__icontains=q)
@@ -181,13 +197,23 @@ def oferta_mensual(request):
             totales["oferta"] += oferta
             totales["bloqueos"] += bloqueos
             totales["efectiva"] += oferta - bloqueos
+            prev = previo.get(medico.id, 0)
             filas.append({
                 "medico": medico,
                 "especialidad": ", ".join(e.nombre for e in medico.especialidades.all()),
                 "oferta": oferta,
                 "bloqueos": bloqueos,
                 "efectiva": oferta - bloqueos,
+                "dif": oferta - prev,
+                "estado": "nuevo" if oferta and not prev else ("sale" if prev and not oferta else ""),
             })
+        if tiene_anterior:
+            totales["dif"] = totales["oferta"] - sum(
+                previo.get(m.id, 0) for m in medicos
+            )
+        else:
+            aparecen = dejan = None
+            dias_previos = 0
 
     contexto = {
         "meses": [{"valor": f"{a}-{m:02d}", "texto": f"{MESES[m - 1].capitalize()} {a}"} for a, m in meses],
@@ -196,6 +222,11 @@ def oferta_mensual(request):
         "totales": totales,
         "dias_cargados": dias_cargados,
         "q": q,
+        "tiene_anterior": bool(meses) and tiene_anterior,
+        "mes_anterior_texto": f"{MESES[anterior[1] - 1].capitalize()} {anterior[0]}" if meses else "",
+        "dias_previos": dias_previos if meses else 0,
+        "aparecen": aparecen if meses else None,
+        "dejan": dejan if meses else None,
     }
     return render(request, "disponibilidad/oferta_mensual.html", contexto)
 

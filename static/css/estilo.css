@@ -392,3 +392,14 @@ table.tabla-oferta tr:hover td { background: #fafbfc; }
 table.tabla-oferta tr:hover td.col-medico { background: #f5f6f8; }
 table.tabla-oferta td.sin-oferta { color: var(--texto-suave); }
 .bloqueos-cita { color: var(--rojo); font-size: 0.78rem; }
+
+/* Oferta médicos: diferencia vs. mes anterior */
+.dif-sube { color: #1e7a34; font-weight: 600; }
+.dif-baja { color: var(--rojo); font-weight: 600; }
+.resumen-cambios { margin-bottom: 1rem; }
+.chip-nuevo, .chip-sale {
+  display: inline-block; margin: 0.15rem 0.3rem 0.15rem 0; padding: 0.15rem 0.55rem;
+  border-radius: 999px; font-size: 0.85rem;
+}
+.chip-nuevo { background: #e6f4ea; color: #1e7a34; }
+.chip-sale { background: #fbeaea; color: var(--rojo); }
