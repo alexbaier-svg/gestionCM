@@ -1,4 +1,4 @@
-<h2 class="titulo-diapo">Meta Agosto</h2>
+<h2 class="titulo-diapo">{{ d.titulo_grafico|default:"Meta" }}</h2>
 
 <div class="kpi-grid">
   {% for kpi in d.kpis %}
