@@ -228,7 +228,93 @@ def oferta_mensual(request):
         "aparecen": aparecen if meses else None,
         "dejan": dejan if meses else None,
     }
+    if request.GET.get("formato") == "pdf":
+        return _pdf_oferta_mensual(contexto)
     return render(request, "disponibilidad/oferta_mensual.html", contexto)
+
+
+def _pdf_oferta_mensual(contexto):
+    import io
+
+    from django.http import HttpResponse
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+    estilos = getSampleStyleSheet()
+    mes_texto = next((m["texto"] for m in contexto["meses"] if m["valor"] == contexto["mes_elegido"]), "")
+    con_dif = contexto["tiene_anterior"]
+    verde, rojo, gris = colors.HexColor("#1e7a34"), colors.HexColor("#c0392b"), colors.HexColor("#6b7280")
+
+    def con_signo(n):
+        return f"+{n}" if n > 0 else str(n)
+
+    elementos = [Paragraph(f"Oferta médicos — {mes_texto}", estilos["Title"])]
+    nota = f"Días con oferta cargada en el mes: {contexto['dias_cargados']}."
+    if con_dif:
+        nota += (f" «Dif.» = oferta de este mes menos la de {contexto['mes_anterior_texto']}"
+                 f" ({contexto['dias_previos']} días cargados).")
+    elementos += [Paragraph(nota, estilos["Normal"]), Spacer(1, 8)]
+
+    if con_dif:
+        for titulo, nombres, color in (
+            ("Aparecen este mes", contexto["aparecen"], verde),
+            ("Ya no aparecen", contexto["dejan"], rojo),
+        ):
+            texto = ", ".join(nombres) if nombres else "ninguno"
+            elementos.append(Paragraph(
+                f'<b><font color="{color.hexval()}">{titulo} ({len(nombres)}):</font></b> {texto}',
+                estilos["Normal"],
+            ))
+        elementos.append(Spacer(1, 8))
+
+    encabezado = ["Médico", "Especialidad", "Oferta"] + (["Dif."] if con_dif else []) + ["Bloqueos", "Efectiva"]
+    datos = [encabezado]
+    estilo_celdas = []
+    for i, fila in enumerate(contexto["filas"], start=1):
+        celdas = [fila["medico"].nombre_completo, fila["especialidad"] or "—", fila["oferta"] or "—"]
+        if con_dif:
+            if fila["estado"] == "nuevo":
+                texto, color = f"+{fila['dif']} nuevo", verde
+            elif fila["estado"] == "sale":
+                texto, color = f"{fila['dif']} ya no aparece", rojo
+            elif fila["dif"]:
+                texto, color = con_signo(fila["dif"]), (verde if fila["dif"] > 0 else rojo)
+            else:
+                texto, color = "0", gris
+            celdas.append(texto)
+            estilo_celdas.append(("TEXTCOLOR", (3, i), (3, i), color))
+        celdas += [fila["bloqueos"] if fila["oferta"] else "—", fila["efectiva"] if fila["oferta"] else "—"]
+        datos.append(celdas)
+    t = contexto["totales"]
+    total = ["Total", "", t["oferta"]] + ([con_signo(t["dif"])] if con_dif else []) + [t["bloqueos"], t["efectiva"]]
+    datos.append(total)
+
+    columnas = [210, 190, 50] + ([90] if con_dif else []) + [55, 55]
+    tabla = Table(datos, colWidths=columnas, repeatRows=1)
+    tabla.setStyle(TableStyle([
+        ("FONTSIZE", (0, 0), (-1, -1), 8),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1e2761")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
+        ("LINEABOVE", (0, -1), (-1, -1), 0.8, colors.black),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -2), [colors.white, colors.HexColor("#f5f6f8")]),
+        ("ALIGN", (2, 0), (-1, -1), "RIGHT"),
+        ("TEXTCOLOR", (0, 1), (-1, -2), colors.black),
+        *estilo_celdas,
+    ]))
+    elementos.append(tabla)
+
+    buffer = io.BytesIO()
+    SimpleDocTemplate(
+        buffer, pagesize=landscape(A4), leftMargin=24, rightMargin=24, topMargin=24, bottomMargin=24,
+        title=f"Oferta médicos {mes_texto}",
+    ).build(elementos)
+    respuesta = HttpResponse(buffer.getvalue(), content_type="application/pdf")
+    respuesta["Content-Disposition"] = f'attachment; filename="oferta_medicos_{contexto["mes_elegido"]}.pdf"'
+    return respuesta
 
 
 @login_required
