@@ -64,6 +64,11 @@ boxes — reemplazando el manejo manual en planillas Excel.
 - **`BloqueoMedico`** (`disponibilidad`): igual estructura + `tipo` (Parcial/Día
   completo) + `motivo`. Representa ausencias. También se reemplaza completo en cada
   importación.
+- **`OfertaDiaria`** (`disponibilidad`): historial por médico y fecha (`oferta` = citas
+  que caben, `bloqueos` = citas cubiertas por bloqueo, ambas en unidades de cita según
+  `duracion_consulta_min`). Única por (médico, fecha). Se regraba para los 6 días lun–sáb
+  de la semana en cada importación de oferta/bloqueos (`calculos.guardar_historial_semana`).
+  Alimenta el menú "Oferta médicos".
 
 ## 5. Roles y permisos
 
@@ -102,6 +107,7 @@ anónimo recibe 403 en vez de ser redirigido a login.
 | `/disponibilidad/mapa-calor/?dia=N&piso=1\|2\|todos` | Heatmap de ocupación de boxes 8:00-20:00. | Todos |
 | `/disponibilidad/alertas/` | Bloqueos sin oferta correspondiente (posible error de carga). | Todos |
 | `/disponibilidad/importar-oferta/`, `/importar-bloqueos/` | Subir los Excel de oferta/bloqueos. | Admin |
+| `/disponibilidad/oferta-medicos/?mes=YYYY-MM&q=...&formato=pdf` | Oferta/bloqueos/efectiva por médico en el mes, diferencia vs mes anterior, quiénes aparecen o dejan de aparecer, exportar a PDF (reportlab). | Admin |
 | `/usuarios/` | Crear cuentas, asignar rol, vincular médico. | Admin |
 | `/admin/` | Django Admin nativo (respaldo técnico). | Superusuario |
 

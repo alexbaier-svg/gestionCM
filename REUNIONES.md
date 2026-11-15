@@ -131,6 +131,61 @@ corrigieron en esta app durante el desarrollo — quedan documentados porque si 
 Si una semana muestra "pocos bloqueos" y no tiene sentido, **sospechar primero de este
 tercer punto** antes de asumir que los datos están bien.
 
+4. **Vigencia de Oferta por día, no por semana** (corregido 11/2026): la vigencia
+   `Validodesde`/`Validohasta` se evalúa para la fecha concreta de cada día de la
+   semana (`inicio_semana + día`), no solo para el lunes. Si no, un médico que atiende
+   un solo día queda fuera de la semana.
+5. **Semana de la importación**: la semana se asigna según el día en que se importa
+   (domingo → lunes siguiente). Un archivo no se puede separar por semana: el del 28/09
+   incluye 1–3 oct.
+6. **Cuidado con alias**: en `importador.py` la función de `calculos` se importa como
+   `lunes_de_semana` porque una variable local `inicio_semana` la tapó y provocó un
+   error 500 al importar. No volver a nombrar así una variable local.
+
+### Historial y menú "Oferta médicos"
+
+- Cada importación de oferta/bloqueos regraba `OfertaDiaria` (ver `DOCUMENTACION.md`).
+  El menú `/disponibilidad/oferta-medicos/` lee de ahí. El historial de un mes refleja
+  el plantel de médicos **vigente al momento de la última importación** de cada semana.
+- Los importadores aceptan `solo_calcular=True`: devuelven las filas sin escribir las
+  tablas vigentes. Úsalo en scripts para recalcular semanas de otro periodo (proyección
+  del mes, comparativos) sin pisar la oferta actual. Para el historial de una semana
+  se llama a `calculos.guardar_historial_semana(lunes, ofertas=..., bloqueos=...)`.
+- Cuando se agrega o quita un médico del plantel, hay que **reimportar** oferta y
+  bloqueos y luego recalcular las reuniones afectadas (la del cierre de mes con la
+  proyección y la semanal en curso). Los scripts de cálculo viven en el scratchpad de
+  la sesión: se reescriben desde la lógica de la sección 2 (recorrer lunes del mes,
+  `importar_oferta_xlsx(..., solo_calcular=True)`, `minutos_brutos`/`minutos_libres`
+  de `disponibilidad/calculos.py`, agrupar por especialidad, citas = minutos // duración).
+- Criterio de cálculo: solo servicios "Consulta*" cuentan como oferta (los
+  "Procedimiento"/Dolor no); sábado incluido; % bloqueos = bloqueos / oferta bruta;
+  meta de bloqueos 15%.
+
+### Plantel de médicos incluidos en el cálculo (decisiones del usuario, 11/2026)
+
+- Se incluyen solo los médicos registrados en el mantenedor y `activo=True`. Agregados
+  recientemente: Sampayo, cirujanos vasculares, Barra y Bizama, Lucas López, nutriólogos
+  y psicólogos, Carlos Domínguez, Marco Antonio Oñate, Kenny Ramos Perozo.
+- Excluidos a pedido: Camila López Netle, Camila Águila, Felipe Ahumada, Ayelen Palacios,
+  Victoria Benavente, Bettina Schmith, Patricia Riquelme, Sofía Catalán, Héctor Figueroa
+  (ecografista), Enid. Sebastián Soto es Gastroenterología (no Medicina Interna).
+- **RUT provisorios**: varios médicos nuevos se crearon con RUT `SIN-RUT-xxxx` porque el
+  campo es obligatorio y único. Pendiente que el usuario entregue los RUT reales
+  (Sampayo, Arancibia, Salgado, Cassina, Barra Friz, López Ponce de León, Domínguez
+  Varas, Bobadilla, Sandoval Arellano, Oñate, Ramos Perozo) y confirme el segundo
+  apellido de Oñate.
+
+### Integración con Sked24 (explorada 15/11/2026, sin resultado)
+
+El sistema externo de citas es Sked24. Su API nueva (`https://proxy1.sked24api.io/v1`
+y `/v2`) usa el encabezado `Ocp-Apim-Subscription-Key` (clave de suscripción) y
+`Authorization: Bearer <ApiKey>`. Prueba hecha: la clave de suscripción es válida
+(sin ella da 401), pero `/v1/Resources` y otros endpoints devuelven 500 con cualquier
+Bearer y `/v2/*` da 404; no se conocen las rutas reales (Swagger solo en QA). Pendiente:
+pedir a soporte de Sked24 la lista de endpoints y revisar el error 500. **Las claves
+NO están en el repo ni en este archivo**; si se retoma, guardarlas como variables de
+entorno (Railway / local) y regenerarlas, porque se compartieron en un chat.
+
 ## 5. Checklist — qué pedirle al usuario antes de armar la reunión
 
 **Siempre:**
@@ -151,6 +206,13 @@ tercer punto** antes de asumir que los datos están bien.
   que informar).
 
 ## 6. Pendientes conocidos (a la fecha de este documento)
+
+- **Usabilidad Autopago de noviembre**: el usuario la entrega al final del mes. Falta
+  también el dato de 1–3 oct.
+- **Reuniones creadas hasta ahora**: 12/10, 19/10, 26/10, cierre de octubre (02/11, con
+  proyección de noviembre) y 09/11. La siguiente es la semana del 16 al 21 de noviembre.
+- Plantilla `meta_agosto.html`: el título del gráfico es `titulo_grafico` y por defecto
+  "Meta" (no fijar el mes en el título).
 
 - **~33 nombres de médicos** aparecen bloqueados en los archivos de Bloqueos pero no
   existen en el mantenedor `Medico` (ej. Andrés Jorquera Escanilla, Fernando Riquelme
