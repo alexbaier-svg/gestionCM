@@ -153,10 +153,22 @@ tercer punto** antes de asumir que los datos están bien.
   se llama a `calculos.guardar_historial_semana(lunes, ofertas=..., bloqueos=...)`.
 - Cuando se agrega o quita un médico del plantel, hay que **reimportar** oferta y
   bloqueos y luego recalcular las reuniones afectadas (la del cierre de mes con la
-  proyección y la semanal en curso). Los scripts de cálculo viven en el scratchpad de
-  la sesión: se reescriben desde la lógica de la sección 2 (recorrer lunes del mes,
-  `importar_oferta_xlsx(..., solo_calcular=True)`, `minutos_brutos`/`minutos_libres`
-  de `disponibilidad/calculos.py`, agrupar por especialidad, citas = minutos // duración).
+  proyección y la semanal en curso). Para eso hay dos comandos en el repo:
+  1. `recalcular_oferta_mes` (`disponibilidad`): calcula el mes semana por semana y por
+     especialidad desde los Excel (rutas locales; los `.xlsx` no se versionan) y deja un
+     JSON. Con `--guardar-historial` regraba `OfertaDiaria`. Con `--solo-lunes` recalcula
+     una semana con otros archivos (ej. comparar con una semana ya cerrada usando los
+     archivos de esa fecha) y `--salida` mezcla con el JSON existente.
+  2. `actualizar_reunion` (`presentacion`): escribe esos números en las diapositivas
+     (semanal: 2, 3 y 4; cierre: 6 y 7). Ver el encabezado de cada archivo.
+
+  Ejemplo completo (noviembre 2026):
+  ```
+  DATABASE_URL="<DATABASE_PUBLIC_URL>" DJANGO_SETTINGS_MODULE=config.settings python manage.py recalcular_oferta_mes --mes 2026-11 --oferta ExportarOferta-20261110.xlsx --bloqueos ExportarBloqueos-20261109.xlsx --salida semanas_nov.json --guardar-historial
+  DATABASE_URL="<DATABASE_PUBLIC_URL>" DJANGO_SETTINGS_MODULE=config.settings python manage.py actualizar_reunion --semanas semanas_nov.json --semanal 2026-11-09 --semana-anterior 2026-11-02 --cierre 2026-11-02 --mes-anterior-oferta 14200 --mes-anterior-bloqueos 1389
+  ```
+  Ojo: `semanas_nov.json` y los Excel quedan en tu carpeta local (no se suben a git).
+  Los 14.200/1.389 son la oferta/bloqueos de octubre usados como mes anterior.
 - Criterio de cálculo: solo servicios "Consulta*" cuentan como oferta (los
   "Procedimiento"/Dolor no); sábado incluido; % bloqueos = bloqueos / oferta bruta;
   meta de bloqueos 15%.
