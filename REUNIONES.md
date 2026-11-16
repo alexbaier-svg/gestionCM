@@ -95,6 +95,33 @@ diapositivas es:
 El **Comparativo Venta año contra año** (`meta_venta.html`) NO va en las reuniones
 semanales: solo en las de cierre de mes (decisión del usuario, 18/10/2026).
 
+### Formato de números y etiquetas (decisión del usuario, 16/11/2026)
+
+- **Decimales con coma, miles con punto** (formato chileno): `6,6%`, `26,1% de bloqueo`,
+  `-0,6 pts`, `3.208`. Las plantillas muestran el `contexto` tal cual (strings), así que
+  el formato se escribe al armar la reunión, no lo pone la plantilla.
+  **Ojo:** el comando `actualizar_reunion` todavía escribe los % y los "pts" con punto
+  (`_pct` y los f-strings de `kpis`/`kpi_destacado`); revisar/corregir a mano después de
+  correrlo hasta que se ajuste el comando.
+- Rangos de fechas en etiquetas como días, no "semanas": `ACUMULADO NOVIEMBRE (DEL 2 AL
+  21 NOV)`, no `(SEMANAS 2 AL 21)`.
+
+### Cálculo de "Consultas diarias necesarias" (diapositiva de Meta)
+
+`(meta del mes − suma de ventas semanales cargadas) ÷ días hábiles lunes a viernes que
+quedan en el mes, contando desde el lunes de la semana de la reunión`, redondeado.
+Ej. reunión 16/11/2026: (9.562 − 4.527) ÷ 11 = 458. `venta_total` debe ser siempre la
+suma de `ventas_semanales`. Confirmar con el usuario la venta de la semana antes de
+cargarla (en la reunión del 16/11 se cargó un valor errado y hubo que corregirlo).
+
+### Usabilidad Autopago: el dato llega con desfase
+
+El % de la semana recién terminada suele no estar disponible el día de la reunión: es
+normal que la serie llegue atrasada (en la reunión del 16/11 llegaba hasta 2–7 nov y
+faltaba 9–14 nov). No inventar ni arrastrar el dato: agregar la semana faltante cuando el
+usuario lo entregue (ver también la nota de pendientes: la de noviembre puede llegar a
+fin de mes).
+
 ### Cierre de mes
 
 Mismo esquema, más el Comparativo Venta año contra año (venta del mes vs. mismo mes del
