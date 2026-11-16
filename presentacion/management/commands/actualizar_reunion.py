@@ -2,8 +2,8 @@
 JSON que genera `recalcular_oferta_mes`.
 
   - Reunión semanal (--semanal FECHA): diapositivas 2 (oferta por especialidad de la
-    semana FECHA), 3 (comparativo vs semana anterior + acumulado) y 4 (oferta efectiva
-    de la semana anterior).
+    semana FECHA), 3 (comparativo vs semana anterior + acumulado del mes hasta FECHA) y
+    4 (oferta efectiva de la semana anterior, en la fila "D al D Mes" de esa semana).
   - Reunión de cierre (--cierre FECHA): diapositivas 6 (proyección del mes completo)
     y 7 (comparativo vs mes anterior; requiere --mes-anterior-oferta/--bloqueos).
 
@@ -14,6 +14,7 @@ Ejemplo:
 Los números se escriben en el contexto (solo las claves necesarias).
 """
 
+import datetime
 import json
 from collections import defaultdict
 from pathlib import Path
@@ -27,9 +28,24 @@ def _f(n):
     return f"{n:,}".replace(",", ".")
 
 
+def _dec(x):
+    # Formato chileno: decimal con coma (ver REUNIONES.md, "Formato de números"). El + 0.0 evita "-0,0".
+    return str(round(x, 1) + 0.0).replace(".", ",")
+
+
 def _p(x):
     v = round(x, 1)
-    return (str(int(v)) if v == int(v) else str(v)) + "%"
+    return (str(int(v)) if v == int(v) else _dec(v)) + "%"
+
+
+MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+
+
+def _etiqueta_semana(lunes_iso):
+    # Mismo formato que las filas de la diapositiva de Meta: "9 al 14 Nov" (lunes a sábado).
+    lunes = datetime.date.fromisoformat(lunes_iso)
+    sabado = lunes + datetime.timedelta(days=5)
+    return f"{lunes.day} al {sabado.day} {MESES[sabado.month - 1]}"
 
 
 def _filas(res):
@@ -40,17 +56,19 @@ def _filas(res):
             continue
         tb += br; tl += bq
         filas.append({"pct": _p(bq / br * 100 if br else 0), "bruta": _f(br), "bloqueos": _f(bq),
-                      "efectiva": _f(br - bq), "especialidad": k})
-    top = max((x for x in filas if x["bruta"] != "0"), key=lambda x: float(x["pct"][:-1]))
+                      "efectiva": _f(br - bq), "especialidad": k, "_v": bq / br if br else 0})
+    top = max((x for x in filas if x["bruta"] != "0"), key=lambda x: x["_v"])
+    for x in filas:
+        del x["_v"]
     return filas, tb, tl, top
 
 
 def _aplicar_oferta(c, filas, tb, tl, top):
     pct = round(tl / tb * 100, 1)
-    c["kpis"][0]["valor"] = _f(tb); c["kpis"][1]["valor"] = _f(tl); c["kpis"][2]["valor"] = f"{pct}%"
+    c["kpis"][0]["valor"] = _f(tb); c["kpis"][1]["valor"] = _f(tl); c["kpis"][2]["valor"] = f"{_dec(pct)}%"
     c["kpis"][3].update({"valor": top["especialidad"], "detalle": f"{top['pct']} de bloqueo"})
     c["filas"] = filas
-    c["total"].update({"pct": f"{pct}%", "bruta": _f(tb), "bloqueos": _f(tl), "efectiva": _f(tb - tl)})
+    c["total"].update({"pct": f"{_dec(pct)}%", "bruta": _f(tb), "bloqueos": _f(tl), "efectiva": _f(tb - tl)})
     return pct
 
 
@@ -86,18 +104,29 @@ class Command(BaseCommand):
             ant = o["semana_anterior"]
             if ant:
                 ab = sum(v[0] for v in S[ant].values()); al = sum(v[1] for v in S[ant].values())
-                ant_pct = round(al / ab * 100, 1); acu = round((al + tl) / (ab + tb) * 100, 1)
+                # Acumulado del mes: todas las semanas del JSON (un mes) hasta la de la reunión.
+                hasta = [v for k, v in S.items() if k <= fecha]
+                mb = sum(x[0] for sem in hasta for x in sem.values())
+                ml = sum(x[1] for sem in hasta for x in sem.values())
+                ant_pct = round(al / ab * 100, 1); acu = round(ml / mb * 100, 1)
                 d = _diap(fecha, 3); c = d.contexto
-                c["kpis"][0]["valor"] = f"{ant_pct}%"; c["kpis"][1]["valor"] = f"{pct}%"
-                c["kpis"][2]["valor"] = str(acu).replace(".", ",") + "%"
+                c["kpis"][0]["valor"] = f"{_dec(ant_pct)}%"; c["kpis"][1]["valor"] = f"{_dec(pct)}%"
+                c["kpis"][2]["valor"] = f"{_dec(acu)}%"
                 c["series"][0]["valores"] = [ab, tb]
                 c["series"][1]["valores"] = [ab - al, tb - tl]
                 c["series"][2]["valores"] = [al, tl]
-                c["kpi_destacado"]["valor"] = f"{round(pct - ant_pct, 1)} pts"
+                c["kpi_destacado"]["valor"] = f"{_dec(pct - ant_pct)} pts"
                 d.contexto = c; d.save()
+                # La fila de la semana anterior no siempre es la primera (la tabla acumula el mes).
                 d = _diap(fecha, 4); c = d.contexto
-                c["ventas_semanales"][0]["oferta_efectiva"] = ab - al
-                d.contexto = c; d.save()
+                etiqueta = _etiqueta_semana(ant)
+                fila = next((x for x in c["ventas_semanales"] if x.get("semana") == etiqueta), None)
+                if fila:
+                    fila["oferta_efectiva"] = ab - al
+                    d.contexto = c; d.save()
+                else:
+                    self.stderr.write(f"Diapositiva 4: no hay fila '{etiqueta}' en ventas_semanales; "
+                                      f"oferta efectiva {ab - al} no se escribió.")
                 msg += f" | anterior {ab}/{al} = {ant_pct}% | acumulado {acu}%"
             self.stdout.write(msg)
 
@@ -114,11 +143,11 @@ class Command(BaseCommand):
                 ob, ol = o["mes_anterior_oferta"], o["mes_anterior_bloqueos"]
                 opct = round(ol / ob * 100, 1)
                 d = _diap(o["cierre"], 7); c = d.contexto
-                c["kpis"][1]["valor"] = f"{pct}%"
+                c["kpis"][1]["valor"] = f"{_dec(pct)}%"
                 c["series"][0]["valores"] = [ob, tb]
                 c["series"][1]["valores"] = [ob - ol, tb - tl]
                 c["series"][2]["valores"] = [ol, tl]
-                c["kpi_destacado"]["valor"] = f"{round(pct - opct, 1)} pts"
+                c["kpi_destacado"]["valor"] = f"{_dec(pct - opct)} pts"
                 d.contexto = c; d.save()
                 msg += f" | vs mes anterior {round(pct - opct, 1)} pts"
             self.stdout.write(msg)

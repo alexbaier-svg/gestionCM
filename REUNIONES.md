@@ -100,9 +100,8 @@ semanales: solo en las de cierre de mes (decisión del usuario, 18/10/2026).
 - **Decimales con coma, miles con punto** (formato chileno): `6,6%`, `26,1% de bloqueo`,
   `-0,6 pts`, `3.208`. Las plantillas muestran el `contexto` tal cual (strings), así que
   el formato se escribe al armar la reunión, no lo pone la plantilla.
-  **Ojo:** el comando `actualizar_reunion` todavía escribe los % y los "pts" con punto
-  (`_pct` y los f-strings de `kpis`/`kpi_destacado`); revisar/corregir a mano después de
-  correrlo hasta que se ajuste el comando.
+  El comando `actualizar_reunion` ya escribe con coma (helper `_dec`); si se arma o
+  corrige una diapositiva con un script propio, usar el mismo formato.
 - Rangos de fechas en etiquetas como días, no "semanas": `ACUMULADO NOVIEMBRE (DEL 2 AL
   21 NOV)`, no `(SEMANAS 2 AL 21)`.
 
